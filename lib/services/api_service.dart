@@ -8,6 +8,9 @@ class ApiService {
 
   static Future<String> login(String username, String password) async {
     try {
+      print('[v0] DEBUG: Attempting login for user: $username');
+      print('[v0] DEBUG: API Endpoint: $baseUrl/api/login/');
+      
       final response = await http.post(
         Uri.parse('$baseUrl/api/login/'),
         headers: {'Content-Type': 'application/json'},
@@ -17,13 +20,20 @@ class ApiService {
         }),
       ).timeout(const Duration(seconds: 10));
 
+      print('[v0] DEBUG: Login response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['token'] as String;
+        final token = data['token'] as String;
+        print('[v0] DEBUG: Login successful! Token received: ${token.substring(0, 10)}...');
+        return token;
       } else {
-        throw Exception('Login failed: ${response.statusCode}');
+        print('[v0] ERROR: Login failed with status ${response.statusCode}');
+        print('[v0] DEBUG: Response: ${response.body}');
+        throw Exception('Login failed: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print('[v0] ERROR in login: $e');
       throw Exception('Login error: $e');
     }
   }
@@ -33,12 +43,20 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
-      if (token == null) throw Exception('No token found');
+      print('[v0] DEBUG: Token from storage = ${token != null ? 'EXISTS' : 'NOT FOUND'}');
+      
+      if (token == null) {
+        print('[v0] ERROR: No token found in SharedPreferences');
+        throw Exception('No token found - Please login first');
+      }
 
       String url = '$baseUrl/api/tickets/';
       if (status != null) {
         url += '?status=$status';
       }
+
+      print('[v0] DEBUG: Fetching from URL: $url');
+      print('[v0] DEBUG: Using token: ${token.substring(0, 10)}...');
 
       final response = await http.get(
         Uri.parse(url),
@@ -48,13 +66,23 @@ class ApiService {
         },
       ).timeout(const Duration(seconds: 10));
 
+      print('[v0] DEBUG: Response status: ${response.statusCode}');
+      print('[v0] DEBUG: Response body: ${response.body.substring(0, 200)}...');
+
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
+        print('[v0] DEBUG: Successfully loaded ${data.length} tickets');
         return data.map((json) => Ticket.fromJson(json as Map<String, dynamic>)).toList();
+      } else if (response.statusCode == 401) {
+        print('[v0] ERROR: Unauthorized - Token invalid or expired');
+        throw Exception('Unauthorized - Token invalid or expired');
       } else {
-        throw Exception('Failed to load tickets: ${response.statusCode}');
+        print('[v0] ERROR: Failed to load tickets: ${response.statusCode}');
+        print('[v0] DEBUG: Error response: ${response.body}');
+        throw Exception('Failed to load tickets: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print('[v0] ERROR in getTickets: $e');
       throw Exception('Get tickets error: $e');
     }
   }
@@ -63,6 +91,8 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
+
+      print('[v0] DEBUG: Fetching ticket detail for ID: $ticketId');
 
       if (token == null) throw Exception('No token found');
 
@@ -74,13 +104,20 @@ class ApiService {
         },
       ).timeout(const Duration(seconds: 10));
 
+      print('[v0] DEBUG: Detail response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print('[v0] DEBUG: Successfully loaded ticket detail');
         return Ticket.fromJson(data as Map<String, dynamic>);
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized - Token invalid');
       } else {
+        print('[v0] ERROR: Failed to load ticket: ${response.statusCode}');
         throw Exception('Failed to load ticket: ${response.statusCode}');
       }
     } catch (e) {
+      print('[v0] ERROR in getTicketDetail: $e');
       throw Exception('Get ticket detail error: $e');
     }
   }

@@ -27,9 +27,12 @@ class TicketProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print('[v0] DEBUG: TicketProvider.fetchTickets called with status: $status');
       _tickets = await ApiService.getTickets(status: status);
+      print('[v0] DEBUG: Successfully fetched ${_tickets.length} tickets');
       _error = null;
     } catch (e) {
+      print('[v0] ERROR in fetchTickets: $e');
       _error = e.toString();
       _tickets = [];
     }
@@ -40,6 +43,7 @@ class TicketProvider extends ChangeNotifier {
 
   Future<void> fetchAllTicketsForStats() async {
     try {
+      print('[v0] DEBUG: fetchAllTicketsForStats called');
       final open = await ApiService.getTickets(status: 'OPEN');
       final inProgress = await ApiService.getTickets(status: 'IN_PROGRESS');
       final resolved = await ApiService.getTickets(status: 'RESOLVED');
@@ -47,8 +51,11 @@ class TicketProvider extends ChangeNotifier {
       _openCount = open.length;
       _inProgressCount = inProgress.length;
       _resolvedCount = resolved.length;
+      
+      print('[v0] DEBUG: Stats - Open: $_openCount, InProgress: $_inProgressCount, Resolved: $_resolvedCount');
       notifyListeners();
     } catch (e) {
+      print('[v0] ERROR in fetchAllTicketsForStats: $e');
       _error = e.toString();
     }
   }
