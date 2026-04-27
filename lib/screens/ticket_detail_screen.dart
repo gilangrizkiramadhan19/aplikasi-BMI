@@ -17,6 +17,16 @@ class TicketDetailScreen extends StatefulWidget {
 }
 
 class _TicketDetailScreenState extends State<TicketDetailScreen> {
+  /// Helper function to construct full photo URL
+  /// If URL is relative, convert to full URL with ngrok endpoint
+  String _getFullPhotoUrl(String photoProof) {
+    if (photoProof.startsWith('http')) {
+      return photoProof;
+    }
+    // Relative URL - prepend base URL
+    return 'https://upstate-unbaked-peso.ngrok-free.dev$photoProof';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -402,21 +412,55 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                 color: Colors.grey.withOpacity(0.2),
                               ),
                               child: Image.network(
-                                ticket.photoProof!,
+                                _getFullPhotoUrl(ticket.photoProof!),
                                 fit: BoxFit.cover,
+                                headers: const {
+                                  'ngrok-skip-browser-warning': 'true',
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(
+                                        Color(0xFF1565C0),
+                                      ),
+                                    ),
+                                  );
+                                },
                                 errorBuilder: (context, error, stackTrace) {
+                                  print('[v0] Error loading photo: $error');
                                   return Center(
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.image_not_supported,
                                           size: 40,
-                                          color: Color(0xFFBDBDBD),
+                                          color: Colors.grey.withOpacity(0.5),
                                         ),
                                         const SizedBox(height: 8),
-                                        const Text('Gagal memuat foto'),
+                                        const Text(
+                                          'Gagal memuat foto',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFF757575),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'URL: ${_getFullPhotoUrl(ticket.photoProof!)}',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Color(0xFFBDBDBD),
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ],
                                     ),
                                   );
