@@ -159,16 +159,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Expanded(
                               child: _StatCard(
-                                title: 'OPEN',
+                                title: 'MENUNGGU',
                                 count: ticketProvider.openCount,
-                                color: const Color(0xFFD32F2F),
+                                color: const Color(0xFFE53935),
                                 icon: Icons.assignment,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _StatCard(
-                                title: 'IN PROGRESS',
+                                title: 'DIPROSES',
                                 count: ticketProvider.inProgressCount,
                                 color: const Color(0xFFF57C00),
                                 icon: Icons.build,
@@ -180,9 +180,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: _StatCard(
-                            title: 'RESOLVED',
+                            title: 'SELESAI',
                             count: ticketProvider.resolvedCount,
-                            color: const Color(0xFF388E3C),
+                            color: const Color(0xFF43A047),
                             icon: Icons.check_circle,
                           ),
                         ),
