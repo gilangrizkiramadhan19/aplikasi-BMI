@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/ticket_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://upstate-unbaked-peso.ngrok-free.dev';
+  static const String baseUrl = 'http://upstate-unbaked-peso.ngrok.free.dev';
 
   /// Helper method untuk membuat headers yang konsisten untuk semua request
   /// Termasuk ngrok-skip-browser-warning header yang diperlukan ngrok

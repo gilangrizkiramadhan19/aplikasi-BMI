@@ -163,7 +163,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     String imageUrl = photoProof;
     if (!photoProof.startsWith('http')) {
       // Ganti dengan base URL Django kamu
-      imageUrl = 'https://upstate-unbaked-peso.ngrok-free.dev$photoProof';
+      imageUrl = 'http://upstate-unbaked-peso.ngrok.free.dev$photoProof';
     }
 
     return ClipRRect(
