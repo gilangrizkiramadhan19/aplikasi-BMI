@@ -1,1 +1,0 @@
- C:\\Users\\gilan\\bmi\\.dart_tool\\flutter_build\\565f01bfab7d469d851cc8de8e59e1d0\\native_assets.json: 

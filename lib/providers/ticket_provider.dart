@@ -27,9 +27,12 @@ class TicketProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print('[v0] DEBUG: TicketProvider.fetchTickets called with status: $status');
       _tickets = await ApiService.getTickets(status: status);
+      print('[v0] DEBUG: Successfully fetched ${_tickets.length} tickets');
       _error = null;
     } catch (e) {
+      print('[v0] ERROR in fetchTickets: $e');
       _error = e.toString();
       _tickets = [];
     }
@@ -40,6 +43,7 @@ class TicketProvider extends ChangeNotifier {
 
   Future<void> fetchAllTicketsForStats() async {
     try {
+      print('[v0] DEBUG: fetchAllTicketsForStats called');
       final open = await ApiService.getTickets(status: 'OPEN');
       final inProgress = await ApiService.getTickets(status: 'IN_PROGRESS');
       final resolved = await ApiService.getTickets(status: 'RESOLVED');
@@ -47,8 +51,11 @@ class TicketProvider extends ChangeNotifier {
       _openCount = open.length;
       _inProgressCount = inProgress.length;
       _resolvedCount = resolved.length;
+      
+      print('[v0] DEBUG: Stats - Open: $_openCount, InProgress: $_inProgressCount, Resolved: $_resolvedCount');
       notifyListeners();
     } catch (e) {
+      print('[v0] ERROR in fetchAllTicketsForStats: $e');
       _error = e.toString();
     }
   }
@@ -105,30 +112,9 @@ class TicketProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> uploadPhotoAndResolve(
-    int ticketId,
-    String filePath,
-    String? materialUsed,
-  ) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      await ApiService.uploadPhoto(ticketId, filePath, materialUsed);
-      await ApiService.updateStatus(ticketId, 'RESOLVED');
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
+  /// Complete Ticket - Upload photo bukti + material digunakan
+  /// Mengirim PATCH request dengan multipart form-data
+  /// Status otomatis berubah ke RESOLVED
   Future<bool> completeTicket(
     int ticketId,
     String filePath,
@@ -140,8 +126,6 @@ class TicketProvider extends ChangeNotifier {
 
     try {
       await ApiService.uploadPhoto(ticketId, filePath, materialUsed);
-      await ApiService.updateStatus(ticketId, 'RESOLVED');
-
       _isLoading = false;
       notifyListeners();
       return true;

@@ -51,7 +51,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: const Color(0xFFD32F2F),
+          backgroundColor: const Color(0xFFE53935),
         ),
       );
     }
@@ -74,7 +74,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: const Color(0xFFD32F2F),
+          backgroundColor: const Color(0xFFE53935),
         ),
       );
     }
@@ -126,7 +126,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Foto bukti harus dipilih'),
-          backgroundColor: Color(0xFFD32F2F),
+          backgroundColor: Color(0xFFE53935),
         ),
       );
       return;
@@ -142,8 +142,8 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tiket berhasil diselesaikan!'),
-            backgroundColor: Color(0xFF388E3C),
+            content: Text('Tugas berhasil diselesaikan dan disimpan!'),
+            backgroundColor: Color(0xFF43A047),
           ),
         );
 
@@ -156,7 +156,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $error'),
-            backgroundColor: const Color(0xFFD32F2F),
+            backgroundColor: const Color(0xFFE53935),
           ),
         );
       }
@@ -168,14 +168,17 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Selesaikan Tiket',
+          'Selesaikan Tugas',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            fontSize: 20,
           ),
         ),
         backgroundColor: const Color(0xFF1565C0),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -183,82 +186,114 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Info Card
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1565C0).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF43A047).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF1565C0).withOpacity(0.3),
+                    color: const Color(0xFF43A047).withOpacity(0.25),
+                    width: 1,
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Color(0xFF1565C0),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF43A047).withOpacity(0.15),
+                      ),
+                      child: const Icon(
+                        Icons.check_circle,
+                        color: Color(0xFF43A047),
+                        size: 20,
+                      ),
                     ),
-                    SizedBox(width: 12),
-                    Expanded(
+                    const SizedBox(width: 12),
+                    const Expanded(
                       child: Text(
-                        'Silakan upload foto bukti perbaikan untuk menyelesaikan tiket ini.',
+                        'Upload foto perbaikan dan deskripsi untuk menyelesaikan tugas ini',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF1565C0),
+                          color: Color(0xFF2E7D32),
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Foto Bukti Perbaikan *',
+              const SizedBox(height: 28),
+
+              // Photo Section
+              Text(
+                'Foto Bukti Perbaikan',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF212121),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey[900],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Ambil atau pilih foto yang menunjukkan hasil perbaikan',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 12),
+
               if (_selectedImage == null)
                 GestureDetector(
                   onTap: _showImagePickerOptions,
                   child: Container(
                     width: double.infinity,
-                    height: 200,
+                    height: 220,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: const Color(0xFF1565C0).withOpacity(0.3),
+                        color: const Color(0xFF43A047).withOpacity(0.3),
                         width: 2,
                         style: BorderStyle.solid,
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                      color: const Color(0xFF1565C0).withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xFF43A047).withOpacity(0.05),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.cloud_upload_outlined,
-                          size: 48,
-                          color: const Color(0xFF1565C0).withOpacity(0.6),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Tap untuk memilih foto',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1565C0),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF43A047).withOpacity(0.12),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt_outlined,
+                            size: 40,
+                            color: const Color(0xFF43A047),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Pilih Foto',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF43A047),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         Text(
-                          'Kamera atau Galeri',
+                          'Tap untuk ambil dari kamera atau galeri',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.withOpacity(0.6),
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
@@ -272,13 +307,20 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                       children: [
                         Container(
                           width: double.infinity,
-                          height: 250,
+                          height: 280,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             color: Colors.grey.withOpacity(0.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             child: Image.file(
                               _selectedImage!,
                               fit: BoxFit.cover,
@@ -286,12 +328,19 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 8,
-                          right: 8,
+                          top: 12,
+                          right: 12,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD32F2F),
-                              borderRadius: BorderRadius.circular(20),
+                              color: const Color(0xFFE53935),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.close),
@@ -304,59 +353,101 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                             ),
                           ),
                         ),
+                        Positioned(
+                          bottom: 12,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Color(0xFF43A047),
+                                  size: 16,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Foto dipilih',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
-                      child: OutlinedButton(
+                      child: OutlinedButton.icon(
                         onPressed: _showImagePickerOptions,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Ganti Foto'),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(
                             color: Color(0xFF1565C0),
+                            width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text(
-                          'Ganti Foto',
-                          style: TextStyle(
-                            color: Color(0xFF1565C0),
-                            fontWeight: FontWeight.bold,
-                          ),
+                          foregroundColor: const Color(0xFF1565C0),
                         ),
                       ),
                     ),
                   ],
                 ),
-              const SizedBox(height: 24),
-              const Text(
-                'Material Digunakan (Opsional)',
+              const SizedBox(height: 28),
+
+              // Material Section
+              Text(
+                'Deskripsi Perbaikan (Opsional)',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF212121),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey[900],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
+              Text(
+                'Jelaskan apa yang telah diperbaiki dan material apa yang digunakan',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: _materialController,
-                maxLines: 3,
+                maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: 'Contoh: Oli mesin, bearing, dll',
+                  hintText: 'Contoh: Ganti oli mesin, setel bearing, perbaiki sambungan, dll',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Colors.grey.withOpacity(0.3),
+                      width: 1,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: const BorderSide(
                       color: Color(0xFF1565C0),
                       width: 2,
@@ -364,74 +455,88 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                   ),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.all(12),
+                  contentPadding: const EdgeInsets.all(14),
+                  hintStyle: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 12,
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
+
+              // Submit Button
               Consumer<TicketProvider>(
                 builder: (context, ticketProvider, _) {
                   return SizedBox(
                     width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: ticketProvider.isLoading
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: ticketProvider.isLoading ? null : _handleUpload,
+                      icon: ticketProvider.isLoading
                           ? null
-                          : _handleUpload,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF388E3C),
-                        disabledBackgroundColor:
-                            const Color(0xFF388E3C).withOpacity(0.6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: ticketProvider.isLoading
+                          : const Icon(Icons.cloud_upload_outlined),
+                      label: ticketProvider.isLoading
                           ? const SizedBox(
-                              width: 24,
-                              height: 24,
+                              width: 20,
+                              height: 20,
                               child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                                strokeWidth: 2.5,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   Colors.white,
                                 ),
                               ),
                             )
                           : const Text(
-                              'Selesaikan Tiket',
+                              'Selesaikan dan Simpan',
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.3,
                               ),
                             ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF43A047),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            const Color(0xFF43A047).withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              
+              // Cancel Button
               SizedBox(
                 width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
+                height: 52,
+                child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: Color(0xFF1565C0),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text(
                     'Kembali',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1565C0),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: Colors.grey.withOpacity(0.4),
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    foregroundColor: const Color(0xFF1565C0),
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
