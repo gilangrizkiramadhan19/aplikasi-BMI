@@ -85,6 +85,9 @@ class ApiService {
     }
   }
 
+  /// Update status to IN_PROGRESS - Terima Tugas
+  /// Endpoint: PATCH /api/tickets/{id}/
+  /// Body: {"status": "IN_PROGRESS"}
   static Future<void> updateStatus(int ticketId, String status) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -109,6 +112,9 @@ class ApiService {
     }
   }
 
+  /// Submit Tugas - Upload photo dan selesaikan tugas
+  /// Endpoint: PATCH /api/tickets/{id}/
+  /// Body: Multipart Form Data dengan status=RESOLVED, photo_proof=file, material_used=text (optional)
   static Future<void> uploadPhoto(
     int ticketId,
     String filePath,
@@ -121,23 +127,31 @@ class ApiService {
       if (token == null) throw Exception('No token found');
 
       final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/api/tickets/$ticketId/upload_photo/'),
+        'PATCH',
+        Uri.parse('$baseUrl/api/tickets/$ticketId/'),
       );
 
+      // Header - jangan set Content-Type manual, biarkan Flutter atur otomatis
       request.headers['Authorization'] = 'Token $token';
-      request.files.add(
-        await http.MultipartFile.fromPath('photo_proof', filePath),
-      );
 
+      // Status diubah menjadi RESOLVED
+      request.fields['status'] = 'RESOLVED';
+
+      // Optional: Material yang digunakan
       if (materialUsed != null && materialUsed.isNotEmpty) {
         request.fields['material_used'] = materialUsed;
       }
 
+      // Upload file foto
+      request.files.add(
+        await http.MultipartFile.fromPath('photo_proof', filePath),
+      );
+
       final response = await request.send().timeout(const Duration(seconds: 30));
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Failed to upload photo: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        final responseBody = await response.stream.bytesToString();
+        throw Exception('Failed to upload photo: ${response.statusCode} - $responseBody');
       }
     } catch (e) {
       throw Exception('Upload photo error: $e');

@@ -105,30 +105,9 @@ class TicketProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> uploadPhotoAndResolve(
-    int ticketId,
-    String filePath,
-    String? materialUsed,
-  ) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      await ApiService.uploadPhoto(ticketId, filePath, materialUsed);
-      await ApiService.updateStatus(ticketId, 'RESOLVED');
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
+  /// Complete Ticket - Upload photo bukti + material digunakan
+  /// Mengirim PATCH request dengan multipart form-data
+  /// Status otomatis berubah ke RESOLVED
   Future<bool> completeTicket(
     int ticketId,
     String filePath,
@@ -140,8 +119,6 @@ class TicketProvider extends ChangeNotifier {
 
     try {
       await ApiService.uploadPhoto(ticketId, filePath, materialUsed);
-      await ApiService.updateStatus(ticketId, 'RESOLVED');
-
       _isLoading = false;
       notifyListeners();
       return true;

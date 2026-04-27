@@ -126,7 +126,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Foto bukti harus dipilih'),
-          backgroundColor: Color(0xFFD32F2F),
+          backgroundColor: Color(0xFFE53935),
         ),
       );
       return;
