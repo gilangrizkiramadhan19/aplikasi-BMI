@@ -6,6 +6,22 @@ import '../models/ticket_model.dart';
 class ApiService {
   static const String baseUrl = 'https://upstate-unbaked-peso.ngrok-free.dev';
 
+  /// Helper method untuk membuat headers yang konsisten untuk semua request
+  /// Termasuk ngrok-skip-browser-warning header yang diperlukan ngrok
+  static Map<String, String> _getHeaders({String? token}) {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+    };
+    
+    if (token != null) {
+      headers['Authorization'] = 'Token $token';
+    }
+    
+    return headers;
+  }
+
   static Future<String> login(String username, String password) async {
     try {
       print('[v0] DEBUG: Attempting login for user: $username');
@@ -13,7 +29,7 @@ class ApiService {
       
       final response = await http.post(
         Uri.parse('$baseUrl/api/login/'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _getHeaders(),
         body: jsonEncode({
           'username': username,
           'password': password,
@@ -60,11 +76,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {
-          'Authorization': 'Token $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _getHeaders(token: token),
       ).timeout(const Duration(seconds: 10));
 
       print('[v0] DEBUG: Response status: ${response.statusCode}');
@@ -110,11 +122,7 @@ class ApiService {
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/tickets/$ticketId/'),
-        headers: {
-          'Authorization': 'Token $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _getHeaders(token: token),
       ).timeout(const Duration(seconds: 10));
 
       print('[v0] DEBUG: Detail response status: ${response.statusCode}');
@@ -147,10 +155,7 @@ class ApiService {
 
       final response = await http.patch(
         Uri.parse('$baseUrl/api/tickets/$ticketId/'),
-        headers: {
-          'Authorization': 'Token $token',
-          'Content-Type': 'application/json',
-        },
+        headers: _getHeaders(token: token),
         body: jsonEncode({'status': status}),
       ).timeout(const Duration(seconds: 10));
 
@@ -183,6 +188,7 @@ class ApiService {
 
       // Header - jangan set Content-Type manual, biarkan Flutter atur otomatis
       request.headers['Authorization'] = 'Token $token';
+      request.headers['ngrok-skip-browser-warning'] = 'true';
 
       // Status diubah menjadi RESOLVED
       request.fields['status'] = 'RESOLVED';
@@ -221,10 +227,7 @@ class ApiService {
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/tickets/'),
-        headers: {
-          'Authorization': 'Token $token',
-          'Content-Type': 'application/json',
-        },
+        headers: _getHeaders(token: token),
         body: jsonEncode({
           'title': title,
           'location': location,
