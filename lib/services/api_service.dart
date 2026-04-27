@@ -63,6 +63,7 @@ class ApiService {
         headers: {
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       ).timeout(const Duration(seconds: 10));
 
@@ -81,8 +82,19 @@ class ApiService {
         print('[v0] DEBUG: Error response: ${response.body}');
         throw Exception('Failed to load tickets: ${response.statusCode} - ${response.body}');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       print('[v0] ERROR in getTickets: $e');
+      
+      // CORS error detection
+      if (e.toString().contains('Failed to fetch')) {
+        print('[v0] CORS ERROR DETECTED!');
+        print('[v0] Backend perlu menambahkan CORS headers:');
+        print('[v0]   Access-Control-Allow-Origin: *');
+        print('[v0]   Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS');
+        print('[v0]   Access-Control-Allow-Headers: Authorization, Content-Type');
+        throw Exception('CORS Error - Backend belum configure CORS headers. Hubungi admin!');
+      }
+      
       throw Exception('Get tickets error: $e');
     }
   }
@@ -101,6 +113,7 @@ class ApiService {
         headers: {
           'Authorization': 'Token $token',
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       ).timeout(const Duration(seconds: 10));
 
