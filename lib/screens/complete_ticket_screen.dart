@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../providers/ticket_provider.dart';
 import 'home_screen.dart';
@@ -21,6 +22,7 @@ class CompleteTicketScreen extends StatefulWidget {
 
 class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
   File? _selectedImage;
+  Uint8List? _selectedImageBytes;
   late TextEditingController _materialController;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -44,8 +46,10 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       );
 
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
         setState(() {
           _selectedImage = File(pickedFile.path);
+          _selectedImageBytes = bytes;
         });
       }
     } catch (e) {
@@ -67,8 +71,10 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       );
 
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
         setState(() {
           _selectedImage = File(pickedFile.path);
+          _selectedImageBytes = bytes;
         });
       }
     } catch (e) {
@@ -323,15 +329,17 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: kIsWeb
+                            child: kIsWeb && _selectedImageBytes != null
                                 ? Image.memory(
-                                    _selectedImage!.readAsBytesSync(),
+                                    _selectedImageBytes!,
                                     fit: BoxFit.cover,
                                   )
-                                : Image.file(
-                                    _selectedImage!,
-                                    fit: BoxFit.cover,
-                                  ),
+                                : _selectedImage != null
+                                    ? Image.file(
+                                        _selectedImage!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(),
                           ),
                         ),
                         Positioned(
@@ -355,6 +363,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                               onPressed: () {
                                 setState(() {
                                   _selectedImage = null;
+                                  _selectedImageBytes = null;
                                 });
                               },
                             ),

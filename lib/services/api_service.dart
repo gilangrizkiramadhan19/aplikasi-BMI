@@ -80,7 +80,10 @@ class ApiService {
       ).timeout(const Duration(seconds: 10));
 
       print('[v0] DEBUG: Response status: ${response.statusCode}');
-      print('[v0] DEBUG: Response body: ${response.body.substring(0, 200)}...');
+      final bodyPreview = response.body.length > 200 
+          ? response.body.substring(0, 200) + '...' 
+          : response.body;
+      print('[v0] DEBUG: Response body: $bodyPreview');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
