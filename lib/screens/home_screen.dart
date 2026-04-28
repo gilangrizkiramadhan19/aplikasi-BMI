@@ -52,19 +52,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'BMI Maintenance',
+          'Sistem Teknisi',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
+            fontSize: 20,
+            letterSpacing: -0.5,
           ),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFF2563EB),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, size: 22),
             onPressed: _showLogoutDialog,
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -75,8 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF1565C0),
-                Color(0xFFF5F5F5),
+                Color(0xFF2563EB),
+                Color(0xFFFAFAFA),
               ],
             ),
           ),
@@ -85,17 +88,19 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 8),
+                
                 // Welcome Card
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -103,42 +108,49 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Selamat datang,',
+                        'Selamat datang kembali,',
                         style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF757575),
+                          fontSize: 13,
+                          color: Color(0xFF9CA3AF),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       const Text(
                         'Teknisi Maintenance',
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1565C0),
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1F2937),
+                          letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF2563EB).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF2563EB).withOpacity(0.15),
+                            width: 1,
+                          ),
                         ),
                         child: const Row(
                           children: [
                             Icon(
                               Icons.info_outline,
-                              size: 20,
-                              color: Color(0xFF1565C0),
+                              size: 18,
+                              color: Color(0xFF2563EB),
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Refresh data untuk melihat tiket terbaru',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF757575),
+                                  color: Color(0xFF4B5563),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -148,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // Stats Cards
                 Consumer<TicketProvider>(
@@ -159,19 +171,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Expanded(
                               child: _StatCard(
-                                title: 'MENUNGGU',
+                                title: 'Menunggu',
                                 count: ticketProvider.openCount,
-                                color: const Color(0xFFE53935),
-                                icon: Icons.assignment,
+                                color: const Color(0xFFEF4444),
+                                icon: Icons.assignment_late,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _StatCard(
-                                title: 'DIPROSES',
+                                title: 'Diproses',
                                 count: ticketProvider.inProgressCount,
-                                color: const Color(0xFFF57C00),
-                                icon: Icons.build,
+                                color: const Color(0xFFF97316),
+                                icon: Icons.auto_awesome,
                               ),
                             ),
                           ],
@@ -180,10 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: _StatCard(
-                            title: 'SELESAI',
+                            title: 'Selesai',
                             count: ticketProvider.resolvedCount,
-                            color: const Color(0xFF43A047),
-                            icon: Icons.check_circle,
+                            color: const Color(0xFF10B981),
+                            icon: Icons.check_circle_outline,
                           ),
                         ),
                       ],
@@ -194,20 +206,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Menu Title
                 const Text(
-                  'Menu',
+                  'Menu Cepat',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
                 // Menu Cards
                 _MenuCard(
                   title: 'Lihat Tugas',
-                  description: 'Lihat daftar tiket maintenance',
-                  icon: Icons.list_alt,
+                  description: 'Kelola tiket maintenance',
+                  icon: Icons.assignment_outlined,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -219,9 +232,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 _MenuCard(
-                  title: 'Buat Laporan Baru',
+                  title: 'Buat Laporan',
                   description: 'Buat laporan kerusakan baru',
-                  icon: Icons.add_circle,
+                  icon: Icons.note_add_outlined,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -233,15 +246,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 _MenuCard(
-                  title: 'Refresh',
-                  description: 'Perbarui data tiket',
-                  icon: Icons.refresh,
+                  title: 'Refresh Data',
+                  description: 'Perbarui data tiket terbaru',
+                  icon: Icons.refresh_outlined,
                   onTap: () {
                     context.read<TicketProvider>().fetchAllTicketsForStats();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Data berhasil diperbarui'),
-                        backgroundColor: Color(0xFF388E3C),
+                        backgroundColor: Color(0xFF10B981),
+                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
@@ -271,15 +285,15 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -294,19 +308,28 @@ class _StatCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF757575),
+                  color: Color(0xFF9CA3AF),
+                  letterSpacing: 0.3,
                 ),
               ),
-              Icon(icon, color: color, size: 20),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 18),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             count.toString(),
             style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
               color: color,
+              letterSpacing: -1,
             ),
           ),
         ],
@@ -315,7 +338,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _MenuCard extends StatelessWidget {
+class _MenuCard extends StatefulWidget {
   final String title;
   final String description;
   final IconData icon;
@@ -329,21 +352,57 @@ class _MenuCard extends StatelessWidget {
   });
 
   @override
+  State<_MenuCard> createState() => _MenuCardState();
+}
+
+class _MenuCardState extends State<_MenuCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTapDown: (_) {
+        _controller.forward();
+      },
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () {
+        _controller.reverse();
+      },
+      child: ScaleTransition(
+        scale: _scaleAnimation,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -352,42 +411,45 @@ class _MenuCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1565C0).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  icon,
-                  color: const Color(0xFF1565C0),
+                  widget.icon,
+                  color: const Color(0xFF2563EB),
                   size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      widget.title,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1F2937),
+                        letterSpacing: -0.2,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description,
+                      widget.description,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF757575),
+                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFFBDBDBD),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: const Color(0xFF2563EB).withOpacity(0.4),
+                size: 20,
               ),
             ],
           ),

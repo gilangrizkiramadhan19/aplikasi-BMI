@@ -74,98 +74,121 @@ class _LoginScreenState extends State<LoginScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF1565C0), Color(0xFF0D47A1)],
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
             ),
           ),
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Logo dengan desain lebih modern
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5,
+                      ),
                     ),
                     child: const Icon(
-                      Icons.engineering,
-                      size: 50,
+                      Icons.build,
+                      size: 56,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   const Text(
-                    'BMI Maintenance',
+                    'Sistem Teknisi Maintenance',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      letterSpacing: -0.5,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Sistem Maintenance Mesin',
+                  const SizedBox(height: 12),
+                  Text(
+                    'Kelola maintenance mesin dengan mudah',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
+                      fontSize: 15,
+                      color: Colors.white.withOpacity(0.85),
+                      fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 56),
+                  
+                  // Form Container
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+                          color: const Color(0xFF1D4ED8).withOpacity(0.25),
+                          blurRadius: 30,
+                          offset: const Offset(0, 15),
                         ),
                       ],
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Text(
+                          'Masuk ke akun Anda',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Username Field
                         TextField(
                           controller: _usernameController,
                           decoration: InputDecoration(
                             hintText: 'Username',
-                            prefixIcon: const Icon(Icons.person),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              size: 20,
+                              color: Color(0xFF6B7280),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFE0E0E0),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF1565C0),
-                                width: 2,
-                              ),
-                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF9FAFB),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Color(0xFF1F2937),
                           ),
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Password Field
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             hintText: 'Password',
-                            prefixIcon: const Icon(Icons.lock),
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              size: 20,
+                              color: Color(0xFF6B7280),
+                            ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                size: 20,
+                                color: const Color(0xFF6B7280),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -173,38 +196,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                 });
                               },
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFFE0E0E0),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF1565C0),
-                                width: 2,
-                              ),
-                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF9FAFB),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Color(0xFF1F2937),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
+                        
+                        // Login Button
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, _) {
                             return SizedBox(
                               width: double.infinity,
-                              height: 48,
+                              height: 52,
                               child: ElevatedButton(
                                 onPressed: authProvider.isLoading
                                     ? null
                                     : _handleLogin,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1565C0),
+                                  backgroundColor: const Color(0xFF2563EB),
                                   disabledBackgroundColor:
-                                      const Color(0xFF1565C0).withOpacity(0.6),
+                                      const Color(0xFF2563EB).withOpacity(0.6),
+                                  elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -214,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: 24,
                                         height: 24,
                                         child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                          strokeWidth: 2.5,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
                                             Colors.white,
@@ -225,23 +241,39 @@ class _LoginScreenState extends State<LoginScreen> {
                                         'Login',
                                         style: TextStyle(
                                           fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w700,
                                           color: Colors.white,
+                                          letterSpacing: 0.5,
                                         ),
                                       ),
-                              ),
+                              );
                             );
                           },
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Demo: teknisi / 123456',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.7),
+                  const SizedBox(height: 28),
+                  
+                  // Demo Info
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: const Text(
+                      'Demo: username: teknisi | password: 123456',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],

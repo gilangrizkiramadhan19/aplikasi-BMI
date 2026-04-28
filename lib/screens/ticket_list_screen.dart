@@ -33,15 +33,15 @@ class _TicketListScreenState extends State<TicketListScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'OPEN':
-        return const Color(0xFFE53935);
+        return const Color(0xFFEF4444);
       case 'IN_PROGRESS':
-        return const Color(0xFFF57C00);
+        return const Color(0xFFF97316);
       case 'RESOLVED':
-        return const Color(0xFF43A047);
+        return const Color(0xFF10B981);
       case 'CLOSED':
-        return const Color(0xFF616161);
+        return const Color(0xFF6B7280);
       default:
-        return const Color(0xFF757575);
+        return const Color(0xFF9CA3AF);
     }
   }
 
@@ -80,46 +80,48 @@ class _TicketListScreenState extends State<TicketListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Lihat Tugas',
+          'Daftar Tugas',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
             fontSize: 20,
+            letterSpacing: -0.5,
           ),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFF2563EB),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
           // Search Bar
           Container(
-            color: const Color(0xFF1565C0),
+            color: const Color(0xFF2563EB),
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Cari lokasi, judul, atau deskripsi...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF616161)),
+                prefixIcon: const Icon(Icons.search_outlined, color: Color(0xFF9CA3AF), size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
+                contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
+                hintStyle: const TextStyle(color: Color(0xFFD1D5DB), fontSize: 14),
               ),
+              style: const TextStyle(color: Color(0xFF1F2937), fontSize: 14),
               onChanged: (_) => setState(() {}),
             ),
           ),
 
           // Filter Tabs with Better Design
           Container(
-            color: const Color(0xFF1565C0),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            color: const Color(0xFF2563EB),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Consumer<TicketProvider>(
@@ -136,7 +138,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       final label = statusMap['label'] as String;
                       final isSelected = _selectedFilter == status;
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: FilterChip(
                           label: Text(label),
                           selected: isSelected,
@@ -145,16 +147,19 @@ class _TicketListScreenState extends State<TicketListScreen> {
                             ticketProvider.setSelectedStatus(status);
                             ticketProvider.fetchTickets(status: status);
                           },
-                          backgroundColor: Colors.white.withOpacity(0.15),
+                          backgroundColor: Colors.white.withOpacity(0.12),
                           selectedColor: Colors.white,
                           labelStyle: TextStyle(
-                            color: isSelected ? const Color(0xFF1565C0) : Colors.white,
+                            color: isSelected ? const Color(0xFF2563EB) : Colors.white,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
                           side: BorderSide(
-                            color: isSelected ? Colors.white : Colors.transparent,
-                            width: 1.5,
+                            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                       );
@@ -195,24 +200,24 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey.withOpacity(0.1),
+                            color: const Color(0xFF2563EB).withOpacity(0.1),
                           ),
                           child: Icon(
-                            Icons.inbox,
+                            Icons.inbox_outlined,
                             size: 64,
-                            color: Colors.grey.withOpacity(0.4),
+                            color: const Color(0xFF2563EB).withOpacity(0.5),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         Text(
                           'Tidak ada tugas',
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.withOpacity(0.7),
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey[700],
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -220,7 +225,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                           'Belum ada tugas pada kategori ini',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey[500],
                           ),
                         ),
                       ],
@@ -234,7 +239,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       status: _selectedFilter,
                     );
                   },
-                  color: const Color(0xFF1565C0),
+                  color: const Color(0xFF2563EB),
                   strokeWidth: 2.5,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(12),
@@ -244,6 +249,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
 
                       return _TicketCard(
+                        key: ValueKey(ticket.id),
                         ticket: ticket,
                         statusColor: _getStatusColor(ticket.status),
                         statusLabel: _getStatusLabel(ticket.status),
@@ -292,17 +298,18 @@ class _TicketCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1.5,
+      elevation: 0.8,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: statusColor.withOpacity(0.15),
+          color: statusColor.withOpacity(0.12),
           width: 1,
         ),
       ),
+      shadowColor: Colors.black.withOpacity(0.04),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -466,12 +473,12 @@ class _TicketCard extends StatelessWidget {
                   icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                   label: const Text('Lihat Detail'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 11),
                     elevation: 0,
                   ),
                 ),

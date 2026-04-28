@@ -68,7 +68,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
           ElevatedButton(
             onPressed: onConfirm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF57C00),
+              backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -91,15 +91,15 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'OPEN':
-        return const Color(0xFFE53935);
+        return const Color(0xFFEF4444);
       case 'IN_PROGRESS':
-        return const Color(0xFFF57C00);
+        return const Color(0xFFF97316);
       case 'RESOLVED':
-        return const Color(0xFF43A047);
+        return const Color(0xFF10B981);
       case 'CLOSED':
-        return const Color(0xFF616161);
+        return const Color(0xFF6B7280);
       default:
-        return const Color(0xFF757575);
+        return const Color(0xFF9CA3AF);
     }
   }
 
@@ -234,15 +234,16 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
         title: const Text(
           'Detail Tugas',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
             fontSize: 20,
+            letterSpacing: -0.5,
           ),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFF2563EB),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Consumer<TicketProvider>(
         builder: (context, ticketProvider, _) {
@@ -250,7 +251,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             return const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  Color(0xFF1565C0),
+                  Color(0xFF2563EB),
                 ),
                 strokeWidth: 3,
               ),
@@ -266,12 +267,12 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.red.withOpacity(0.1),
+                      color: const Color(0xFFEF4444).withOpacity(0.1),
                     ),
                     child: const Icon(
                       Icons.error_outline,
                       size: 64,
-                      color: Color(0xFFE53935),
+                      color: Color(0xFFEF4444),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -297,7 +298,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Kembali'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1565C0),
+                      backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -327,13 +328,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        statusColor.withOpacity(0.15),
-                        statusColor.withOpacity(0.05),
+                        statusColor.withOpacity(0.12),
+                        statusColor.withOpacity(0.04),
                       ],
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: statusColor.withOpacity(0.2),
+                        color: statusColor.withOpacity(0.15),
                         width: 1,
                       ),
                     ),
@@ -403,31 +404,31 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _DetailCard(
-                        icon: Icons.location_on,
+                        icon: Icons.location_on_outlined,
                         title: 'Lokasi',
                         content: ticket.location,
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 12),
                       _DetailCard(
-                        icon: Icons.description,
+                        icon: Icons.description_outlined,
                         title: 'Deskripsi',
                         content: ticket.description,
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 12),
                       _DetailCard(
-                        icon: Icons.person,
+                        icon: Icons.person_outline,
                         title: 'Pelapor',
                         content: ticket.reporterName ?? '-',
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 12),
                       _DetailCard(
-                        icon: Icons.engineering,
+                        icon: Icons.engineering_outlined,
                         title: 'Teknisi',
                         content: ticket.technicianName ?? '-',
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 12),
 
@@ -436,27 +437,27 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                         Column(
                           children: [
                             _DetailCard(
-                              icon: Icons.inventory,
+                              icon: Icons.inventory_2_outlined,
                               title: 'Material Digunakan',
                               content: ticket.materialUsed!,
-                              color: const Color(0xFF1565C0),
+                              color: const Color(0xFF2563EB),
                             ),
                             const SizedBox(height: 12),
                           ],
                         ),
 
                       _DetailCard(
-                        icon: Icons.calendar_today,
+                        icon: Icons.calendar_today_outlined,
                         title: 'Dibuat',
                         content: dateFormat.format(ticket.createdAt),
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 12),
                       _DetailCard(
-                        icon: Icons.update,
+                        icon: Icons.update_outlined,
                         title: 'Diperbarui',
                         content: dateFormat.format(ticket.updatedAt),
-                        color: const Color(0xFF1565C0),
+                        color: const Color(0xFF2563EB),
                       ),
                       const SizedBox(height: 16),
 
@@ -481,10 +482,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color:
-                                const Color(0xFFF57C00).withOpacity(0.1),
+                                const Color(0xFFF97316).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFFF57C00)
+                                  color: const Color(0xFFF97316)
                                       .withOpacity(0.2),
                                   width: 1,
                                 ),
@@ -493,7 +494,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                 children: [
                                   Icon(
                                     Icons.info_outline,
-                                    color: Color(0xFFF57C00),
+                                    color: Color(0xFFF97316),
                                     size: 18,
                                   ),
                                   SizedBox(width: 8),
@@ -502,7 +503,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                       'Ambil tugas ini untuk mulai mengerjakannya',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Color(0xFFF57C00),
+                                        color: Color(0xFFF97316),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -540,8 +541,9 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                                 : 'Error: ${ticketProvider.error}',
                                           ),
                                           backgroundColor: success
-                                              ? const Color(0xFF43A047)
-                                              : const Color(0xFFE53935),
+                                              ? const Color(0xFF10B981)
+                                              : const Color(0xFFEF4444),
+                                          behavior: SnackBarBehavior.floating,
                                         ),
                                       );
                                     },
@@ -556,7 +558,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFF57C00),
+                                  backgroundColor: const Color(0xFFF97316),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -727,19 +729,26 @@ class _DetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withOpacity(0.15),
           width: 1,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 20),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -748,18 +757,19 @@ class _DetailCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.withOpacity(0.7),
+                    color: Colors.grey[600],
+                    letterSpacing: 0.3,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   content,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF212121),
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F2937),
                   ),
                   maxLines: 10,
                   overflow: TextOverflow.ellipsis,
