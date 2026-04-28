@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/ticket_model.dart';
 
@@ -177,8 +179,13 @@ class ApiService {
     int ticketId,
     String filePath,
     String? materialUsed,
+    {Uint8List? fileBytes}
   ) async {
     try {
+      print('[v0] DEBUG: uploadPhoto called - ticketId: $ticketId, filePath: $filePath');
+      print('[v0] DEBUG: Platform: ${kIsWeb ? 'WEB' : 'MOBILE/DESKTOP'}');
+      print('[v0] DEBUG: fileBytes provided: ${fileBytes != null}');
+      
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
@@ -201,18 +208,38 @@ class ApiService {
         request.fields['material_used'] = materialUsed;
       }
 
-      // Upload file foto
-      request.files.add(
-        await http.MultipartFile.fromPath('photo_proof', filePath),
-      );
+      // Upload file foto - support both web dan mobile
+      if (kIsWeb && fileBytes != null) {
+        // Web: gunakan bytes langsung
+        print('[v0] DEBUG: Using bytes for web upload (size: ${fileBytes.length} bytes)');
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'photo_proof',
+            fileBytes,
+            filename: 'photo_proof.jpg',
+          ),
+        );
+      } else {
+        // Mobile/Desktop: gunakan file path
+        print('[v0] DEBUG: Using file path for mobile upload');
+        request.files.add(
+          await http.MultipartFile.fromPath('photo_proof', filePath),
+        );
+      }
 
       final response = await request.send().timeout(const Duration(seconds: 30));
 
+      print('[v0] DEBUG: Upload response status: ${response.statusCode}');
+
       if (response.statusCode != 200) {
         final responseBody = await response.stream.bytesToString();
+        print('[v0] ERROR: Upload failed - ${response.statusCode}: $responseBody');
         throw Exception('Failed to upload photo: ${response.statusCode} - $responseBody');
       }
+      
+      print('[v0] DEBUG: Photo uploaded successfully!');
     } catch (e) {
+      print('[v0] ERROR in uploadPhoto: $e');
       throw Exception('Upload photo error: $e');
     }
   }

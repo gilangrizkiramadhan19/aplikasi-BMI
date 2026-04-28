@@ -139,11 +139,12 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       );
       return;
     }
-
+    
     context.read<TicketProvider>().completeTicket(
       widget.ticketId,
       _selectedImage!.path,
       _materialController.text.isEmpty ? null : _materialController.text,
+      fileBytes: _selectedImageBytes,
     ).then((success) {
       if (!mounted) return;
 
