@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import '../providers/ticket_provider.dart';
 import 'home_screen.dart';
 
@@ -321,10 +323,15 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: Image.file(
-                              _selectedImage!,
-                              fit: BoxFit.cover,
-                            ),
+                            child: kIsWeb
+                                ? Image.memory(
+                                    _selectedImage!.readAsBytesSync(),
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    _selectedImage!,
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                         Positioned(
