@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../providers/ticket_provider.dart';
+import '../utils/image_compression.dart';
 import 'home_screen.dart';
 
 class CompleteTicketScreen extends StatefulWidget {
@@ -23,6 +24,8 @@ class CompleteTicketScreen extends StatefulWidget {
 class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
   File? _selectedImage;
   Uint8List? _selectedImageBytes;
+  CompressionResult? _compressionResult;
+  bool _isCompressing = false;
   late TextEditingController _materialController;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -46,11 +49,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       );
 
       if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-          _selectedImageBytes = bytes;
-        });
+        _compressAndSetImage(File(pickedFile.path));
       }
     } catch (e) {
       if (!mounted) return;
@@ -71,17 +70,61 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       );
 
       if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-          _selectedImageBytes = bytes;
-        });
+        _compressAndSetImage(File(pickedFile.path));
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
+          backgroundColor: const Color(0xFFE53935),
+        ),
+      );
+    }
+  }
+
+  Future<void> _compressAndSetImage(File imageFile) async {
+    setState(() {
+      _isCompressing = true;
+    });
+
+    try {
+      final compressionResult = await ImageCompression.compressImage(
+        imageFile,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 75,
+      );
+
+      if (!mounted) return;
+
+      final bytes = await compressionResult.compressedFile.readAsBytes();
+      setState(() {
+        _selectedImage = compressionResult.compressedFile;
+        _selectedImageBytes = bytes;
+        _compressionResult = compressionResult;
+        _isCompressing = false;
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Foto berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
+          ),
+          backgroundColor: const Color(0xFF43A047),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isCompressing = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error kompresi foto: $e'),
           backgroundColor: const Color(0xFFE53935),
         ),
       );
@@ -257,7 +300,54 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
               ),
               const SizedBox(height: 12),
 
-              if (_selectedImage == null)
+              if (_isCompressing)
+                Container(
+                  width: double.infinity,
+                  height: 220,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFF43A047).withOpacity(0.3),
+                      width: 2,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xFF43A047).withOpacity(0.05),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF43A047),
+                          ),
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'Mengompresi Foto...',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF43A047),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Proses otomatis kompresi gambar sedang berjalan',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (_selectedImage == null)
                 GestureDetector(
                   onTap: _showImagePickerOptions,
                   child: Container(
@@ -365,6 +455,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                                 setState(() {
                                   _selectedImage = null;
                                   _selectedImageBytes = null;
+                                  _compressionResult = null;
                                 });
                               },
                             ),
@@ -425,6 +516,120 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                         ),
                       ),
                     ),
+                    if (_compressionResult != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF43A047).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF43A047).withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.compress,
+                                  color: Color(0xFF43A047),
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Informasi Kompresi',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF43A047),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Ukuran Asli',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _compressionResult!.originalSize,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  size: 18,
+                                  color: Colors.grey[400],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Ukuran Terkompresi',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _compressionResult!.compressedSize,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF43A047),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Reduksi',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${_compressionResult!.compressionPercentage.toStringAsFixed(1)}%',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF43A047),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               const SizedBox(height: 28),
