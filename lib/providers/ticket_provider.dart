@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 import '../models/ticket_model.dart';
 import '../services/api_service.dart';
 
@@ -119,13 +120,19 @@ class TicketProvider extends ChangeNotifier {
     int ticketId,
     String filePath,
     String? materialUsed,
+    {Uint8List? fileBytes}
   ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
-
+    
     try {
-      await ApiService.uploadPhoto(ticketId, filePath, materialUsed);
+      await ApiService.uploadPhoto(
+        ticketId, 
+        filePath, 
+        materialUsed,
+        fileBytes: fileBytes,
+      );
       _isLoading = false;
       notifyListeners();
       return true;

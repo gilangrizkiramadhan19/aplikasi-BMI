@@ -1,16 +1,20 @@
-# v0 sandbox internal files
-__v0_runtime_loader.js
-__v0_devtools.tsx
-__v0_jsx-dev-runtime.ts
-.snowflake/
-.v0-trash/
-.vercel/
-next.user-config.*
+# Flutter
+.dart_tool/
+.packages
+build/
 
-# Environment variables
-.env*.local
+# Android
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
 
-# Common ignores
-node_modules
-.next/
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# MacOS
 .DS_Store

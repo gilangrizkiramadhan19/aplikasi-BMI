@@ -4,6 +4,22 @@ import 'package:intl/intl.dart';
 import '../providers/ticket_provider.dart';
 import 'ticket_detail_screen.dart';
 
+// ── BMI Brand Colors ──────────────────────────────────────────────
+class _BMI {
+  static const blue      = Color(0xFF1B3A7A);
+  static const blueMid   = Color(0xFF2550A7);
+  static const blueLight = Color(0xFFEBF1FF);
+  static const gold      = Color(0xFFC9920A);
+  static const goldMid   = Color(0xFFE4A80E);
+  static const goldLight = Color(0xFFFDF6E3);
+  static const goldPale  = Color(0xFFFFF8E7);
+  static const textDark  = Color(0xFF1A1A2E);
+  static const textMid   = Color(0xFF4A5568);
+  static const textLight = Color(0xFF718096);
+  static const bg        = Color(0xFFF4F6FB);
+  static const border    = Color(0xFFE2E8F0);
+}
+
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({Key? key}) : super(key: key);
 
@@ -30,197 +46,258 @@ class _TicketListScreenState extends State<TicketListScreen> {
     super.dispose();
   }
 
+  // ── Status Helpers ────────────────────────────────────────────────
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'OPEN':
-        return const Color(0xFFE53935);
-      case 'IN_PROGRESS':
-        return const Color(0xFFF57C00);
-      case 'RESOLVED':
-        return const Color(0xFF43A047);
-      case 'CLOSED':
-        return const Color(0xFF616161);
-      default:
-        return const Color(0xFF757575);
+      case 'OPEN':        return const Color(0xFFE53935);
+      case 'IN_PROGRESS': return _BMI.gold;
+      case 'RESOLVED':    return const Color(0xFF43A047);
+      case 'CLOSED':      return const Color(0xFF616161);
+      default:            return const Color(0xFF757575);
     }
   }
 
   String _getStatusLabel(String status) {
     switch (status) {
-      case 'OPEN':
-        return 'Menunggu';
-      case 'IN_PROGRESS':
-        return 'Diproses';
-      case 'RESOLVED':
-        return 'Selesai';
-      case 'CLOSED':
-        return 'Selesai (Arsip)';
-      default:
-        return status;
+      case 'OPEN':        return 'Menunggu';
+      case 'IN_PROGRESS': return 'Diproses';
+      case 'RESOLVED':    return 'Selesai';
+      case 'CLOSED':      return 'Selesai (Arsip)';
+      default:            return status;
     }
   }
 
   IconData _getStatusIcon(String status) {
     switch (status) {
-      case 'OPEN':
-        return Icons.assignment;
-      case 'IN_PROGRESS':
-        return Icons.build;
-      case 'RESOLVED':
-        return Icons.check_circle;
-      case 'CLOSED':
-        return Icons.check_circle_outline;
-      default:
-        return Icons.help_outline;
+      case 'OPEN':        return Icons.assignment_outlined;
+      case 'IN_PROGRESS': return Icons.build_outlined;
+      case 'RESOLVED':    return Icons.check_circle_outline;
+      case 'CLOSED':      return Icons.archive_outlined;
+      default:            return Icons.help_outline;
     }
   }
 
+  // ── Build ─────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _BMI.bg,
+
+      // ── AppBar ──────────────────────────────────────────────────
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [_BMI.blue, _BMI.blueMid],
+            ),
+          ),
+        ),
         title: const Text(
           'Lihat Tugas',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 18,
+            letterSpacing: 0.3,
           ),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: Container(
+            height: 3,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  _BMI.goldMid,
+                  _BMI.gold,
+                  _BMI.goldMid,
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
+
       body: Column(
         children: [
-          // Search Bar
+          // ── Search + Filter header ──────────────────────────────
           Container(
-            color: const Color(0xFF1565C0),
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Cari lokasi, judul, atau deskripsi...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF616161)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [_BMI.blue, _BMI.blueMid],
+              ),
+            ),
+            child: Column(
+              children: [
+                // Search bar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: _BMI.textDark,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Cari lokasi, judul, atau deskripsi...',
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: _BMI.textLight.withOpacity(0.7),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: _BMI.blue.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
-              ),
-              onChanged: (_) => setState(() {}),
+
+                // Filter chips
+                Consumer<TicketProvider>(
+                  builder: (context, ticketProvider, _) {
+                    final statuses = [
+                      {'key': 'OPEN',        'label': 'Menunggu'},
+                      {'key': 'IN_PROGRESS', 'label': 'Diproses'},
+                      {'key': 'RESOLVED',    'label': 'Selesai'},
+                      {'key': 'CLOSED',      'label': 'Arsip'},
+                    ];
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+                      child: Row(
+                        children: statuses.map((s) {
+                          final key      = s['key']!;
+                          final label    = s['label']!;
+                          final isActive = _selectedFilter == key;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedFilter = key);
+                                ticketProvider.setSelectedStatus(key);
+                                ticketProvider.fetchTickets(status: key);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? _BMI.gold
+                                      : Colors.white.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? _BMI.gold
+                                        : Colors.white.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isActive
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.8),
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
 
-          // Filter Tabs with Better Design
-          Container(
-            color: const Color(0xFF1565C0),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Consumer<TicketProvider>(
-                builder: (context, ticketProvider, _) {
-                  final statuses = [
-                    {'key': 'OPEN', 'label': 'Menunggu'},
-                    {'key': 'IN_PROGRESS', 'label': 'Diproses'},
-                    {'key': 'RESOLVED', 'label': 'Selesai'},
-                    {'key': 'CLOSED', 'label': 'Arsip'}
-                  ];
-                  return Row(
-                    children: statuses.map((statusMap) {
-                      final status = statusMap['key'] as String;
-                      final label = statusMap['label'] as String;
-                      final isSelected = _selectedFilter == status;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: FilterChip(
-                          label: Text(label),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() => _selectedFilter = status);
-                            ticketProvider.setSelectedStatus(status);
-                            ticketProvider.fetchTickets(status: status);
-                          },
-                          backgroundColor: Colors.white.withOpacity(0.15),
-                          selectedColor: Colors.white,
-                          labelStyle: TextStyle(
-                            color: isSelected ? const Color(0xFF1565C0) : Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                          side: BorderSide(
-                            color: isSelected ? Colors.white : Colors.transparent,
-                            width: 1.5,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Ticket List
+          // ── Ticket List ─────────────────────────────────────────
           Expanded(
             child: Consumer<TicketProvider>(
               builder: (context, ticketProvider, _) {
-                final allTickets = ticketProvider.tickets;
-                final searchQuery = _searchController.text.toLowerCase();
-                final filteredTickets = allTickets
-                    .where((ticket) =>
-                        ticket.title.toLowerCase().contains(searchQuery) ||
-                        ticket.location.toLowerCase().contains(searchQuery) ||
-                        ticket.description.toLowerCase().contains(searchQuery))
-                    .toList();
+                final allTickets   = ticketProvider.tickets;
+                final searchQuery  = _searchController.text.toLowerCase();
+                final filtered     = allTickets.where((t) =>
+                t.title.toLowerCase().contains(searchQuery) ||
+                    t.location.toLowerCase().contains(searchQuery) ||
+                    t.description.toLowerCase().contains(searchQuery),
+                ).toList();
 
+                // Loading
                 if (ticketProvider.isLoading) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF1565C0),
-                      ),
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(_BMI.blue),
                       strokeWidth: 3,
                     ),
                   );
                 }
 
-                if (filteredTickets.isEmpty) {
+                // Empty state
+                if (filtered.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey.withOpacity(0.1),
+                            color: _BMI.blueLight,
                           ),
                           child: Icon(
-                            Icons.inbox,
-                            size: 64,
-                            color: Colors.grey.withOpacity(0.4),
+                            Icons.inbox_outlined,
+                            size: 52,
+                            color: _BMI.blue.withOpacity(0.3),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        Text(
+                        const SizedBox(height: 18),
+                        const Text(
                           'Tidak ada tugas',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.withOpacity(0.7),
+                            color: _BMI.textMid,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
+                        const SizedBox(height: 6),
+                        const Text(
                           'Belum ada tugas pada kategori ini',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: _BMI.textLight,
                           ),
                         ),
                       ],
@@ -228,36 +305,34 @@ class _TicketListScreenState extends State<TicketListScreen> {
                   );
                 }
 
+                // List
                 return RefreshIndicator(
                   onRefresh: () async {
                     await ticketProvider.fetchTickets(
-                      status: _selectedFilter,
-                    );
+                        status: _selectedFilter);
                   },
-                  color: const Color(0xFF1565C0),
+                  color: _BMI.blue,
                   strokeWidth: 2.5,
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: filteredTickets.length,
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
+                    itemCount: filtered.length,
                     itemBuilder: (context, index) {
-                      final ticket = filteredTickets[index];
-                      final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
-
+                      final ticket     = filtered[index];
+                      final dateFormat =
+                      DateFormat('dd MMM yyyy', 'id_ID');
                       return _TicketCard(
-                        ticket: ticket,
+                        ticket:      ticket,
                         statusColor: _getStatusColor(ticket.status),
                         statusLabel: _getStatusLabel(ticket.status),
-                        statusIcon: _getStatusIcon(ticket.status),
-                        dateString: dateFormat.format(ticket.createdAt),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  TicketDetailScreen(ticketId: ticket.id),
-                            ),
-                          );
-                        },
+                        statusIcon:  _getStatusIcon(ticket.status),
+                        dateString:  dateFormat.format(ticket.createdAt),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TicketDetailScreen(ticketId: ticket.id),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -271,12 +346,15 @@ class _TicketListScreenState extends State<TicketListScreen> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Ticket Card
+// ─────────────────────────────────────────────────────────────────────────────
 class _TicketCard extends StatelessWidget {
-  final dynamic ticket;
-  final Color statusColor;
-  final String statusLabel;
-  final IconData statusIcon;
-  final String dateString;
+  final dynamic      ticket;
+  final Color        statusColor;
+  final String       statusLabel;
+  final IconData     statusIcon;
+  final String       dateString;
   final VoidCallback onTap;
 
   const _TicketCard({
@@ -290,196 +368,284 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1.5,
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: statusColor.withOpacity(0.15),
-          width: 1,
-        ),
+        border: Border.all(color: _BMI.border),
+        // Subtle left accent stripe via boxShadow trick — no shadow, just border
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with Status
-              Row(
+        child: Column(
+          children: [
+            // ── Gold top accent line ──────────────────────────────
+            Container(
+              height: 3,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _BMI.blue.withOpacity(0.6),
+                    _BMI.gold,
+                    _BMI.goldMid,
+                  ],
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Status Icon Circle
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: statusColor.withOpacity(0.12),
-                    ),
-                    child: Icon(
-                      statusIcon,
-                      color: statusColor,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Title and Location
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ticket.title,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1A1A1A),
+                  // ── Header row ──────────────────────────────────
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Status icon box
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: statusColor.withOpacity(0.2),
+                            width: 0.8,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
-                        Row(
+                        child: Icon(statusIcon,
+                            color: statusColor, size: 19),
+                      ),
+                      const SizedBox(width: 11),
+
+                      // Title + location
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 14,
-                              color: statusColor.withOpacity(0.7),
+                            Text(
+                              ticket.title,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: _BMI.textDark,
+                                height: 1.3,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 13,
+                                  color: _BMI.gold,
+                                ),
+                                const SizedBox(width: 3),
+                                Expanded(
+                                  child: Text(
+                                    ticket.location,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: _BMI.textLight,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Status badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: statusColor.withOpacity(0.3),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
                             ),
                             const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                ticket.location,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            Text(
+                              statusLabel,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: statusColor,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  // Status Badge
+
+                  const SizedBox(height: 12),
+
+                  // ── Divider ─────────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    height: 1,
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: statusColor.withOpacity(0.3),
-                        width: 0.5,
+                      gradient: LinearGradient(
+                        colors: [
+                          _BMI.gold.withOpacity(0.3),
+                          _BMI.border,
+                          Colors.transparent,
+                        ],
                       ),
                     ),
-                    child: Text(
-                      statusLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: statusColor,
+                  ),
+
+                  const SizedBox(height: 11),
+
+                  // ── Meta row ────────────────────────────────────
+                  Row(
+                    children: [
+                      // Pelapor
+                      Expanded(
+                        child: _MetaChip(
+                          icon: Icons.person_outline,
+                          label: 'Pelapor',
+                          value: ticket.reporterName ?? '-',
+                          iconColor: _BMI.blue,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Tanggal
+                      Expanded(
+                        child: _MetaChip(
+                          icon: Icons.calendar_today_outlined,
+                          label: 'Tanggal',
+                          value: dateString,
+                          iconColor: _BMI.gold,
+                          alignRight: true,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Detail Button ───────────────────────────────
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton.icon(
+                      onPressed: onTap,
+                      icon: const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16),
+                      label: const Text(
+                        'Lihat Detail',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _BMI.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 0),
                       ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 14),
-
-              // Divider
-              Divider(
-                height: 1,
-                color: Colors.grey.withOpacity(0.15),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Info Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pelapor',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          ticket.reporterName ?? '-',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF1A1A1A),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Tanggal',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          dateString,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF1A1A1A),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 14),
-
-              // Action Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                  label: const Text('Lihat Detail'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+// ── Meta chip (pelapor / tanggal) ─────────────────────────────────
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String   label;
+  final String   value;
+  final Color    iconColor;
+  final bool     alignRight;
+
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.iconColor,
+    this.alignRight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment:
+      alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: alignRight
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            if (!alignRight) ...[
+              Icon(icon, size: 12, color: iconColor),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                color: _BMI.textLight,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (alignRight) ...[
+              const SizedBox(width: 4),
+              Icon(icon, size: 12, color: iconColor),
+            ],
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12,
+            color: _BMI.textDark,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: alignRight ? TextAlign.end : TextAlign.start,
+        ),
+      ],
     );
   }
 }
