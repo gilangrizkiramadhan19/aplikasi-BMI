@@ -113,14 +113,14 @@ class TicketProvider extends ChangeNotifier {
     }
   }
 
-  /// Complete Ticket - Upload photo bukti + material digunakan
-  /// Mengirim PATCH request dengan multipart form-data
+  /// Complete Ticket - Upload multiple photos + material digunakan
+  /// Mengirim PATCH request dengan multipart form-data (multiple files)
   /// Status otomatis berubah ke RESOLVED
   Future<bool> completeTicket(
     int ticketId,
-    String filePath,
+    List<String> filePaths,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {List<Uint8List>? fileBytes}
   ) async {
     _isLoading = true;
     _error = null;
@@ -129,7 +129,7 @@ class TicketProvider extends ChangeNotifier {
     try {
       await ApiService.uploadPhoto(
         ticketId, 
-        filePath, 
+        filePaths, 
         materialUsed,
         fileBytes: fileBytes,
       );
