@@ -49,15 +49,15 @@ class ScheduleProvider extends ChangeNotifier {
 
   Future<void> submitReport(
     int scheduleId,
-    String filePath,
+    List<String> filePaths,
     String keterangan,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {List<Uint8List>? fileBytes}
   ) async {
     try {
       await ApiService.submitScheduleReport(
         scheduleId,
-        filePath,
+        filePaths,
         keterangan,
         materialUsed,
         fileBytes: fileBytes,

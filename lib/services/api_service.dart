@@ -336,18 +336,18 @@ class ApiService {
     }
   }
 
-  /// Submit Preventive Maintenance report dengan dokumentasi
+  /// Submit Preventive Maintenance report dengan dokumentasi (multiple photos)
   /// Endpoint: PATCH /api/preventive-maintenance/{id}/
-  /// Body: Multipart Form Data dengan status=RESOLVED, photo=file, keterangan=text, material_used=text
+  /// Body: Multipart Form Data dengan status=RESOLVED, photos=files[], keterangan=text, material_used=text
   static Future<void> submitScheduleReport(
     int scheduleId,
-    String filePath,
+    List<String> filePaths,
     String keterangan,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {List<Uint8List>? fileBytes}
   ) async {
     try {
-      print('[v0] DEBUG: submitScheduleReport called - scheduleId: $scheduleId');
+      print('[v0] DEBUG: submitScheduleReport called - scheduleId: $scheduleId, photos: ${filePaths.length}');
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -369,18 +369,23 @@ class ApiService {
         request.fields['material_used'] = materialUsed;
       }
 
-      if (kIsWeb && fileBytes != null) {
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'photo',
-            fileBytes,
-            filename: 'schedule_report.jpg',
-          ),
-        );
-      } else {
-        request.files.add(
-          await http.MultipartFile.fromPath('photo', filePath),
-        );
+      // Upload multiple photos
+      for (int i = 0; i < filePaths.length; i++) {
+        if (kIsWeb && fileBytes != null && i < fileBytes.length) {
+          print('[v0] DEBUG: Adding photo ${i + 1} from bytes');
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'photos',
+              fileBytes[i],
+              filename: 'schedule_report_${i + 1}.jpg',
+            ),
+          );
+        } else {
+          print('[v0] DEBUG: Adding photo ${i + 1} from path');
+          request.files.add(
+            await http.MultipartFile.fromPath('photos', filePaths[i]),
+          );
+        }
       }
 
       final response = await request.send().timeout(const Duration(seconds: 30));
