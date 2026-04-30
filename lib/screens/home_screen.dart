@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/ticket_provider.dart';
+import '../providers/schedule_provider.dart';
 import 'ticket_list_screen.dart';
+import 'preventive_maintenance_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -432,6 +434,28 @@ class _HomeScreenState extends State<HomeScreen>
                           MaterialPageRoute(
                               builder: (_) => const TicketListScreen()),
                         ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _MenuCard(
+                        title: 'Perawatan Rutin',
+                        description: 'Jadwal preventive maintenance',
+                        icon: Icons.schedule_rounded,
+                        iconBg: const Color(0xFF1565C0).withOpacity(0.08),
+                        iconColor: const Color(0xFF1565C0),
+                        onTap: () {
+                          context.read<ScheduleProvider>().fetchSchedulesByMonth(
+                            DateTime.now().year,
+                            DateTime.now().month,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PreventiveMaintenanceScreen(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 24),
