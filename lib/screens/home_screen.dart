@@ -446,7 +446,6 @@ class _HomeScreenState extends State<HomeScreen>
                         iconColor: const Color(0xFF1565C0),
                         onTap: () {
                           context.read<ScheduleProvider>().fetchSchedulesByMonth(
-                            DateTime.now().year,
                             DateTime.now().month,
                           );
                           Navigator.push(

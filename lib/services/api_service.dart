@@ -276,15 +276,16 @@ class ApiService {
   }
 
   /// Fetch Preventive Maintenance schedules by month
-  /// Endpoint: GET /api/preventive-maintenance/?year=YYYY&month=MM
-  static Future<List<Schedule>> getSchedulesByMonth(int year, int month) async {
+  /// Endpoint: GET /api/schedules/month/<month_id>/
+  /// Note: Year is hardcoded to 2026 in backend
+  static Future<List<Schedule>> getSchedulesByMonth(int month) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
       if (token == null) throw Exception('No token found');
 
-      final url = '$baseUrl/api/preventive-maintenance/?year=$year&month=$month';
+      final url = '$baseUrl/api/schedules/month/$month/';
       print('[v0] DEBUG: Fetching schedules from: $url');
 
       final response = await http.get(
@@ -310,7 +311,7 @@ class ApiService {
   }
 
   /// Take/Terima Jadwal Preventive Maintenance task
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
+  /// Endpoint: PATCH /api/schedules/{id}/
   /// Body: {"status": "IN_PROGRESS"}
   static Future<void> takeScheduleTask(int scheduleId) async {
     try {
@@ -320,7 +321,7 @@ class ApiService {
       if (token == null) throw Exception('No token found');
 
       final response = await http.patch(
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/'),
         headers: _getHeaders(token: token),
         body: jsonEncode({'status': 'IN_PROGRESS'}),
       ).timeout(const Duration(seconds: 10));
@@ -336,15 +337,16 @@ class ApiService {
     }
   }
 
-  /// Submit Preventive Maintenance report dengan dokumentasi
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
-  /// Body: Multipart Form Data dengan status=RESOLVED, photo=file, keterangan=text, material_used=text
+  /// Submit Preventive Maintenance report dengan dokumentasi (2 bukti foto)
+  /// Endpoint: PATCH /api/schedules/{id}/
+  /// Body: Multipart Form Data dengan status=RESOLVED, photo_1=file, photo_2=file, keterangan=text, material_used=text
   static Future<void> submitScheduleReport(
     int scheduleId,
-    String filePath,
+    String filePath1,
+    String filePath2,
     String keterangan,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {Uint8List? fileBytes1, Uint8List? fileBytes2}
   ) async {
     try {
       print('[v0] DEBUG: submitScheduleReport called - scheduleId: $scheduleId');
@@ -356,7 +358,7 @@ class ApiService {
 
       final request = http.MultipartRequest(
         'PATCH',
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/'),
       );
 
       request.headers['Authorization'] = 'Token $token';
@@ -369,17 +371,33 @@ class ApiService {
         request.fields['material_used'] = materialUsed;
       }
 
-      if (kIsWeb && fileBytes != null) {
+      // Upload Bukti Foto 1
+      if (kIsWeb && fileBytes1 != null) {
         request.files.add(
           http.MultipartFile.fromBytes(
-            'photo',
-            fileBytes,
-            filename: 'schedule_report.jpg',
+            'photo_1',
+            fileBytes1,
+            filename: 'schedule_report_1.jpg',
           ),
         );
       } else {
         request.files.add(
-          await http.MultipartFile.fromPath('photo', filePath),
+          await http.MultipartFile.fromPath('photo_1', filePath1),
+        );
+      }
+
+      // Upload Bukti Foto 2
+      if (kIsWeb && fileBytes2 != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'photo_2',
+            fileBytes2,
+            filename: 'schedule_report_2.jpg',
+          ),
+        );
+      } else {
+        request.files.add(
+          await http.MultipartFile.fromPath('photo_2', filePath2),
         );
       }
 

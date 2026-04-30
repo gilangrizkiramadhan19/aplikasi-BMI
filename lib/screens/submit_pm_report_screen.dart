@@ -21,9 +21,16 @@ class SubmitPmReportScreen extends StatefulWidget {
 }
 
 class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
-  File? _selectedImage;
-  Uint8List? _selectedImageBytes;
-  CompressionResult? _compressionResult;
+  // Photo 1
+  File? _selectedImage1;
+  Uint8List? _selectedImageBytes1;
+  CompressionResult? _compressionResult1;
+  
+  // Photo 2
+  File? _selectedImage2;
+  Uint8List? _selectedImageBytes2;
+  CompressionResult? _compressionResult2;
+  
   bool _isCompressing = false;
   bool _isSubmitting = false;
 
@@ -45,7 +52,7 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     super.dispose();
   }
 
-  Future<void> _compressAndSetImage(File imageFile) async {
+  Future<void> _compressAndSetImage(File imageFile, int photoNumber) async {
     setState(() {
       _isCompressing = true;
     });
@@ -62,9 +69,15 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
 
       final bytes = await compressionResult.compressedFile.readAsBytes();
       setState(() {
-        _selectedImage = compressionResult.compressedFile;
-        _selectedImageBytes = bytes;
-        _compressionResult = compressionResult;
+        if (photoNumber == 1) {
+          _selectedImage1 = compressionResult.compressedFile;
+          _selectedImageBytes1 = bytes;
+          _compressionResult1 = compressionResult;
+        } else {
+          _selectedImage2 = compressionResult.compressedFile;
+          _selectedImageBytes2 = bytes;
+          _compressionResult2 = compressionResult;
+        }
         _isCompressing = false;
       });
 
@@ -72,7 +85,7 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Foto berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
+            'Foto $photoNumber berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
           ),
           backgroundColor: const Color(0xFF43A047),
           duration: const Duration(seconds: 3),
@@ -93,15 +106,15 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     }
   }
 
-  Future<void> _pickImageFromCamera() async {
+  Future<void> _pickImage(int photoNumber, ImageSource source) async {
     try {
       final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         imageQuality: 80,
       );
 
       if (pickedFile != null) {
-        _compressAndSetImage(File(pickedFile.path));
+        _compressAndSetImage(File(pickedFile.path), photoNumber);
       }
     } catch (e) {
       if (!mounted) return;
@@ -114,45 +127,24 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     }
   }
 
-  Future<void> _pickImageFromGallery() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        _compressAndSetImage(File(pickedFile.path));
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
-    }
-  }
-
-  void _showImagePickerOptions() {
+  void _showImagePickerOptions(int photoNumber) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pilih Sumber Foto'),
+        title: Text('Pilih Sumber Foto $photoNumber'),
         content: const Text('Ambil foto dari mana?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _pickImageFromCamera();
+              _pickImage(photoNumber, ImageSource.camera);
             },
             child: const Text('Kamera'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _pickImageFromGallery();
+              _pickImage(photoNumber, ImageSource.gallery);
             },
             child: const Text('Galeri'),
           ),
@@ -165,12 +157,304 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     );
   }
 
+  Widget _buildPhotoSection(int photoNumber, File? selectedImage,
+      Uint8List? selectedImageBytes, CompressionResult? compressionResult) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Bukti Foto ${photoNumber == 1 ? 'Sebelum' : 'Sesudah'}',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Photo Preview
+        if (_isCompressing && photoNumber == 1)
+          Container(
+            width: double.infinity,
+            height: 200,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: const Color(0xFF43A047).withOpacity(0.3),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              color: const Color(0xFF43A047).withOpacity(0.05),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF43A047),
+                    ),
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Mengompresi Foto...',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF43A047),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (selectedImage == null)
+          GestureDetector(
+            onTap: () => _showImagePickerOptions(photoNumber),
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color(0xFF43A047).withOpacity(0.3),
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                color: const Color(0xFF43A047).withOpacity(0.05),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF43A047).withOpacity(0.12),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 40,
+                      color: Color(0xFF43A047),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Pilih Foto',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF43A047),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tap untuk upload foto dokumentasi',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF43A047).withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.file(
+                    selectedImage!,
+                    fit: BoxFit.cover,
+                    height: 200,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black.withOpacity(0.6),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    color: Colors.white,
+                    onPressed: () {
+                      setState(() {
+                        if (photoNumber == 1) {
+                          _selectedImage1 = null;
+                          _selectedImageBytes1 = null;
+                          _compressionResult1 = null;
+                        } else {
+                          _selectedImage2 = null;
+                          _selectedImageBytes2 = null;
+                          _compressionResult2 = null;
+                        }
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _showImagePickerOptions(photoNumber),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Ganti Foto'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(
+                color: Color(0xFF1565C0),
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              foregroundColor: const Color(0xFF1565C0),
+            ),
+          ),
+        ),
+        // Compression Info
+        if (compressionResult != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF43A047).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF43A047).withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.compress,
+                      color: Color(0xFF43A047),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Informasi Kompresi',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF43A047),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Asli',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          compressionResult.originalSize,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: Colors.grey[400],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kompresi',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          compressionResult.compressedSize,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF43A047),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Hemat',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${compressionResult.compressionPercentage.toStringAsFixed(1)}%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF43A047),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Future<void> _handleSubmit() async {
-    // Validasi
-    if (_selectedImage == null) {
+    // Validasi - kedua foto harus ada
+    if (_selectedImage1 == null || _selectedImage2 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Foto dokumentasi harus diupload'),
+          content: Text('Kedua bukti foto harus diupload'),
           backgroundColor: Color(0xFFE53935),
         ),
       );
@@ -194,10 +478,12 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     try {
       await context.read<ScheduleProvider>().submitReport(
             widget.schedule.id,
-            _selectedImage!.path,
+            _selectedImage1!.path,
+            _selectedImage2!.path,
             _keteranganController.text,
             _materialController.text.isEmpty ? null : _materialController.text,
-            fileBytes: _selectedImageBytes,
+            fileBytes1: _selectedImageBytes1,
+            fileBytes2: _selectedImageBytes2,
           );
 
       if (!mounted) return;
@@ -288,288 +574,15 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
 
             const SizedBox(height: 24),
 
-            // Dokumentasi Foto
-            Text(
-              'Dokumentasi Foto',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 12),
+            // Photo 1
+            _buildPhotoSection(1, _selectedImage1, _selectedImageBytes1,
+                _compressionResult1),
 
-            // Photo Preview
-            if (_isCompressing)
-              Container(
-                width: double.infinity,
-                height: 220,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFF43A047).withOpacity(0.3),
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  color: const Color(0xFF43A047).withOpacity(0.05),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Color(0xFF43A047),
-                        ),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const Text(
-                      'Mengompresi Foto...',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF43A047),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (_selectedImage == null)
-              GestureDetector(
-                onTap: _showImagePickerOptions,
-                child: Container(
-                  width: double.infinity,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFF43A047).withOpacity(0.3),
-                      width: 2,
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    color: const Color(0xFF43A047).withOpacity(0.05),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF43A047).withOpacity(0.12),
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 40,
-                          color: Color(0xFF43A047),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      const Text(
-                        'Pilih Foto',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF43A047),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Tap untuk ambil foto dokumentasi',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: const Color(0xFF43A047).withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Image.file(
-                        _selectedImage!,
-                        fit: BoxFit.cover,
-                        height: 220,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.6),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        color: Colors.white,
-                        onPressed: () {
-                          setState(() {
-                            _selectedImage = null;
-                            _selectedImageBytes = null;
-                            _compressionResult = null;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 12),
-
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _showImagePickerOptions,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Ganti Foto'),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(
-                    color: Color(0xFF1565C0),
-                    width: 1.5,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  foregroundColor: const Color(0xFF1565C0),
-                ),
-              ),
-            ),
-
-            // Compression Info
-            if (_compressionResult != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF43A047).withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xFF43A047).withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.compress,
-                          color: Color(0xFF43A047),
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Informasi Kompresi',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF43A047),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ukuran Asli',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _compressionResult!.originalSize,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 18,
-                          color: Colors.grey[400],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ukuran Terkompresi',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _compressionResult!.compressedSize,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF43A047),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Reduksi',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${_compressionResult!.compressionPercentage.toStringAsFixed(1)}%',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF43A047),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            // Photo 2
+            _buildPhotoSection(2, _selectedImage2, _selectedImageBytes2,
+                _compressionResult2),
 
             const SizedBox(height: 24),
 
@@ -587,7 +600,8 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
               controller: _keteranganController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Jelaskan hasil perawatan, kondisi mesin, dan pekerjaan yang dilakukan...',
+                hintText:
+                    'Jelaskan hasil perawatan, kondisi mesin, dan pekerjaan yang dilakukan...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -611,11 +625,11 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Material Digunakan (Optional)
+            // Material Digunakan
             Text(
-              'Material Digunakan (Opsional)',
+              'Material yang Digunakan (Optional)',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -627,7 +641,7 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
               controller: _materialController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Sebutkan material yang digunakan (contoh: oli, seal, bearing, dsb)',
+                hintText: 'Contoh: Oli mesin, sabun pembersih, bearing, dll...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -651,39 +665,39 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Submit Button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _handleSubmit,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.send),
-                label: Text(
-                  _isSubmitting ? 'Mengirim...' : 'Kirim Laporan',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF43A047),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  disabledBackgroundColor: Colors.grey[400],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Submit Laporan',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
 

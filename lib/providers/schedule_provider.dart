@@ -7,24 +7,21 @@ class ScheduleProvider extends ChangeNotifier {
   List<Schedule> _schedules = [];
   bool _isLoading = false;
   String? _error;
-  int _currentYear = DateTime.now().year;
   int _currentMonth = DateTime.now().month;
 
   List<Schedule> get schedules => _schedules;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  int get currentYear => _currentYear;
   int get currentMonth => _currentMonth;
 
-  Future<void> fetchSchedulesByMonth(int year, int month) async {
+  Future<void> fetchSchedulesByMonth(int month) async {
     _isLoading = true;
     _error = null;
-    _currentYear = year;
     _currentMonth = month;
     notifyListeners();
 
     try {
-      _schedules = await ApiService.getSchedulesByMonth(year, month);
+      _schedules = await ApiService.getSchedulesByMonth(month);
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -39,7 +36,7 @@ class ScheduleProvider extends ChangeNotifier {
     try {
       await ApiService.takeScheduleTask(scheduleId);
       // Refresh schedules setelah take task
-      await fetchSchedulesByMonth(_currentYear, _currentMonth);
+      await fetchSchedulesByMonth(_currentMonth);
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -49,21 +46,24 @@ class ScheduleProvider extends ChangeNotifier {
 
   Future<void> submitReport(
     int scheduleId,
-    String filePath,
+    String filePath1,
+    String filePath2,
     String keterangan,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {Uint8List? fileBytes1, Uint8List? fileBytes2}
   ) async {
     try {
       await ApiService.submitScheduleReport(
         scheduleId,
-        filePath,
+        filePath1,
+        filePath2,
         keterangan,
         materialUsed,
-        fileBytes: fileBytes,
+        fileBytes1: fileBytes1,
+        fileBytes2: fileBytes2,
       );
       // Refresh schedules setelah submit
-      await fetchSchedulesByMonth(_currentYear, _currentMonth);
+      await fetchSchedulesByMonth(_currentMonth);
     } catch (e) {
       _error = e.toString();
       notifyListeners();

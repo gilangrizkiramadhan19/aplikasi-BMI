@@ -4,13 +4,10 @@ class Schedule {
   final String machineName;
   final String location;
   final String status; // OPEN, IN_PROGRESS, RESOLVED
-  final int? technicianId;
   final String? technicianUsername;
   final String? keterangan;
   final String? materialUsed;
-  final DateTime scheduledDate;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? completedAt;
 
   Schedule({
     required this.id,
@@ -18,13 +15,10 @@ class Schedule {
     required this.machineName,
     required this.location,
     required this.status,
-    this.technicianId,
     this.technicianUsername,
     this.keterangan,
     this.materialUsed,
-    required this.scheduledDate,
-    required this.createdAt,
-    required this.updatedAt,
+    this.completedAt,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
@@ -34,13 +28,12 @@ class Schedule {
       machineName: json['machine_name'] as String,
       location: json['location'] as String,
       status: json['status'] as String,
-      technicianId: json['technician_id'] as int?,
-      technicianUsername: json['technician_username'] as String?,
+      technicianUsername: json['technician__username'] as String?,
       keterangan: json['keterangan'] as String?,
       materialUsed: json['material_used'] as String?,
-      scheduledDate: DateTime.parse(json['scheduled_date'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'] as String)
+          : null,
     );
   }
 
@@ -51,13 +44,10 @@ class Schedule {
       'machine_name': machineName,
       'location': location,
       'status': status,
-      'technician_id': technicianId,
-      'technician_username': technicianUsername,
+      'technician__username': technicianUsername,
       'keterangan': keterangan,
       'material_used': materialUsed,
-      'scheduled_date': scheduledDate.toIso8601String(),
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'completed_at': completedAt?.toIso8601String(),
     };
   }
 }

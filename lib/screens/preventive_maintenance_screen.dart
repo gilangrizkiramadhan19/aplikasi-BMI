@@ -27,7 +27,6 @@ class _PreventiveMaintenanceScreenState
   void _loadSchedules() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ScheduleProvider>().fetchSchedulesByMonth(
-            _selectedDate.year,
             _selectedDate.month,
           );
     });
