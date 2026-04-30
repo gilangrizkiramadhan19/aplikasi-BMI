@@ -85,7 +85,6 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
           _compressionResult2 = compressionResult;
           _isCompressing2 = false;
         }
-        _isCompressing = false;
       });
 
       if (!mounted) return;
