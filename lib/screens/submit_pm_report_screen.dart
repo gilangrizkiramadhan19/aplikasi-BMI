@@ -25,13 +25,14 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
   File? _selectedImage1;
   Uint8List? _selectedImageBytes1;
   CompressionResult? _compressionResult1;
+  bool _isCompressing1 = false;
   
   // Photo 2
   File? _selectedImage2;
   Uint8List? _selectedImageBytes2;
   CompressionResult? _compressionResult2;
+  bool _isCompressing2 = false;
   
-  bool _isCompressing = false;
   bool _isSubmitting = false;
 
   late TextEditingController _keteranganController;
@@ -54,7 +55,11 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
 
   Future<void> _compressAndSetImage(File imageFile, int photoNumber) async {
     setState(() {
-      _isCompressing = true;
+      if (photoNumber == 1) {
+        _isCompressing1 = true;
+      } else {
+        _isCompressing2 = true;
+      }
     });
 
     try {
@@ -73,10 +78,12 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
           _selectedImage1 = compressionResult.compressedFile;
           _selectedImageBytes1 = bytes;
           _compressionResult1 = compressionResult;
+          _isCompressing1 = false;
         } else {
           _selectedImage2 = compressionResult.compressedFile;
           _selectedImageBytes2 = bytes;
           _compressionResult2 = compressionResult;
+          _isCompressing2 = false;
         }
         _isCompressing = false;
       });
@@ -85,7 +92,7 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Foto $photoNumber berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
+            'Foto berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
           ),
           backgroundColor: const Color(0xFF43A047),
           duration: const Duration(seconds: 3),
@@ -94,7 +101,11 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _isCompressing = false;
+        if (photoNumber == 1) {
+          _isCompressing1 = false;
+        } else {
+          _isCompressing2 = false;
+        }
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -159,6 +170,8 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
 
   Widget _buildPhotoSection(int photoNumber, File? selectedImage,
       Uint8List? selectedImageBytes, CompressionResult? compressionResult) {
+    final isCompressing = photoNumber == 1 ? _isCompressing1 : _isCompressing2;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -172,7 +185,7 @@ class _SubmitPmReportScreenState extends State<SubmitPmReportScreen> {
         ),
         const SizedBox(height: 12),
         // Photo Preview
-        if (_isCompressing && photoNumber == 1)
+        if (isCompressing)
           Container(
             width: double.infinity,
             height: 200,
