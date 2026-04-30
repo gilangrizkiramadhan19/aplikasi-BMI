@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import '../providers/ticket_provider.dart';
 import '../utils/image_compression.dart';
 import '../widgets/photo_zoom_viewer.dart';
+import '../widgets/zoomable_image.dart';
 import 'home_screen.dart';
 
 class CompleteTicketScreen extends StatefulWidget {

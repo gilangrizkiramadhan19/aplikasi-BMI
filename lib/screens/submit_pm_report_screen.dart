@@ -8,6 +8,7 @@ import '../providers/schedule_provider.dart';
 import '../models/schedule_model.dart';
 import '../utils/image_compression.dart';
 import '../widgets/photo_zoom_viewer.dart';
+import '../widgets/zoomable_image.dart';
 
 class SubmitPmReportScreen extends StatefulWidget {
   final Schedule schedule;
