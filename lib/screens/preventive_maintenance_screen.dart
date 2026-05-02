@@ -405,15 +405,20 @@ class _PreventiveMaintenanceScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    schedule.keterangan!,
+                    schedule.keterangan.isNotEmpty 
+                        ? schedule.keterangan 
+                        : 'Tidak ada keterangan',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[700],
+                      fontStyle: schedule.keterangan.isEmpty 
+                          ? FontStyle.italic 
+                          : FontStyle.normal,
                     ),
                   ),
                 ],
               ),
-            if (schedule.materialUsed != null && schedule.materialUsed!.isNotEmpty)
+            if (schedule.materialUsed.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -428,7 +433,7 @@ class _PreventiveMaintenanceScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    schedule.materialUsed!,
+                    schedule.materialUsed,
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[700],
@@ -590,24 +595,25 @@ class ScheduleCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 16,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        DateFormat('dd MMM yyyy', 'id_ID')
-                            .format(schedule.scheduledDate),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[700],
+                  if (schedule.scheduledDate != null)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          size: 16,
+                          color: Colors.grey[600],
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 6),
+                        Text(
+                          DateFormat('dd MMM yyyy', 'id_ID')
+                              .format(schedule.scheduledDate!),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
                   if (schedule.technicianUsername != null &&
                       schedule.technicianUsername!.isNotEmpty)
                     Column(
