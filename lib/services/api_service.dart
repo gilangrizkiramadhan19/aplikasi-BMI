@@ -173,17 +173,17 @@ class ApiService {
     }
   }
 
-  /// Submit Tugas - Upload photo dan selesaikan tugas
+  /// Submit Tugas - Upload multiple photos dan selesaikan tugas
   /// Endpoint: PATCH /api/tickets/{id}/
-  /// Body: Multipart Form Data dengan status=RESOLVED, photo_proof=file, material_used=text (optional)
+  /// Body: Multipart Form Data dengan status=RESOLVED, photos[]=files, material_used=text (optional)
   static Future<void> uploadPhoto(
     int ticketId,
-    String filePath,
+    List<String> filePaths,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {List<Uint8List>? fileBytes}
   ) async {
     try {
-      print('[v0] DEBUG: uploadPhoto called - ticketId: $ticketId, filePath: $filePath');
+      print('[v0] DEBUG: uploadPhoto called - ticketId: $ticketId, photoCount: ${filePaths.length}');
       print('[v0] DEBUG: Platform: ${kIsWeb ? 'WEB' : 'MOBILE/DESKTOP'}');
       print('[v0] DEBUG: fileBytes provided: ${fileBytes != null}');
       
@@ -209,23 +209,25 @@ class ApiService {
         request.fields['material_used'] = materialUsed;
       }
 
-      // Upload file foto - support both web dan mobile
-      if (kIsWeb && fileBytes != null) {
-        // Web: gunakan bytes langsung
-        print('[v0] DEBUG: Using bytes for web upload (size: ${fileBytes.length} bytes)');
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'photo_proof',
-            fileBytes,
-            filename: 'photo_proof.jpg',
-          ),
-        );
-      } else {
-        // Mobile/Desktop: gunakan file path
-        print('[v0] DEBUG: Using file path for mobile upload');
-        request.files.add(
-          await http.MultipartFile.fromPath('photo_proof', filePath),
-        );
+      // Upload multiple file fotos - support both web dan mobile
+      for (int i = 0; i < filePaths.length; i++) {
+        if (kIsWeb && fileBytes != null && i < fileBytes.length) {
+          // Web: gunakan bytes langsung
+          print('[v0] DEBUG: Using bytes for photo ${i + 1} (size: ${fileBytes[i].length} bytes)');
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'photos',
+              fileBytes[i],
+              filename: 'photo_proof_${i + 1}.jpg',
+            ),
+          );
+        } else {
+          // Mobile/Desktop: gunakan file path
+          print('[v0] DEBUG: Using file path for photo ${i + 1}');
+          request.files.add(
+            await http.MultipartFile.fromPath('photos', filePaths[i]),
+          );
+        }
       }
 
       final response = await request.send().timeout(const Duration(seconds: 30));
@@ -235,7 +237,7 @@ class ApiService {
       if (response.statusCode != 200) {
         final responseBody = await response.stream.bytesToString();
         print('[v0] ERROR: Upload failed - ${response.statusCode}: $responseBody');
-        throw Exception('Failed to upload photo: ${response.statusCode} - $responseBody');
+        throw Exception('Failed to upload photos: ${response.statusCode} - $responseBody');
       }
       
       print('[v0] DEBUG: Photo uploaded successfully!');
@@ -336,18 +338,18 @@ class ApiService {
     }
   }
 
-  /// Submit Preventive Maintenance report dengan dokumentasi
+  /// Submit Preventive Maintenance report dengan dokumentasi (multiple photos)
   /// Endpoint: PATCH /api/preventive-maintenance/{id}/
-  /// Body: Multipart Form Data dengan status=RESOLVED, photo=file, keterangan=text, material_used=text
+  /// Body: Multipart Form Data dengan status=RESOLVED, photos=files[], keterangan=text, material_used=text
   static Future<void> submitScheduleReport(
     int scheduleId,
-    String filePath,
+    List<String> filePaths,
     String keterangan,
     String? materialUsed,
-    {Uint8List? fileBytes}
+    {List<Uint8List>? fileBytes}
   ) async {
     try {
-      print('[v0] DEBUG: submitScheduleReport called - scheduleId: $scheduleId');
+      print('[v0] DEBUG: submitScheduleReport called - scheduleId: $scheduleId, photos: ${filePaths.length}');
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -369,18 +371,23 @@ class ApiService {
         request.fields['material_used'] = materialUsed;
       }
 
-      if (kIsWeb && fileBytes != null) {
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'photo',
-            fileBytes,
-            filename: 'schedule_report.jpg',
-          ),
-        );
-      } else {
-        request.files.add(
-          await http.MultipartFile.fromPath('photo', filePath),
-        );
+      // Upload multiple photos
+      for (int i = 0; i < filePaths.length; i++) {
+        if (kIsWeb && fileBytes != null && i < fileBytes.length) {
+          print('[v0] DEBUG: Adding photo ${i + 1} from bytes');
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'photos',
+              fileBytes[i],
+              filename: 'schedule_report_${i + 1}.jpg',
+            ),
+          );
+        } else {
+          print('[v0] DEBUG: Adding photo ${i + 1} from path');
+          request.files.add(
+            await http.MultipartFile.fromPath('photos', filePaths[i]),
+          );
+        }
       }
 
       final response = await request.send().timeout(const Duration(seconds: 30));

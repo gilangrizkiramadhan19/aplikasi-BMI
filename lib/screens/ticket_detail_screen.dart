@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/ticket_provider.dart';
+import '../widgets/zoomable_image.dart';
 import 'complete_ticket_screen.dart';
 
 // ── BMI Brand Colors ──────────────────────────────────────────────
@@ -206,66 +207,22 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
       imageUrl = 'https://upstate-unbaked-peso.ngrok-free.dev$photoProof';
     }
 
-    return ClipRRect(
+    return ZoomableImage.network(
+      imageUrl,
+      width: double.infinity,
+      height: 220,
+      fit: BoxFit.cover,
       borderRadius: BorderRadius.circular(10),
-      child: Image.network(
-        imageUrl,
+      loadingBuilder: Container(
         width: double.infinity,
         height: 220,
-        fit: BoxFit.cover,
-        headers: const {'ngrok-skip-browser-warning': 'true'},
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            width: double.infinity,
-            height: 220,
-            color: _BMI.blueLight,
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-                    : null,
-                color: _BMI.blue,
-                strokeWidth: 3,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            height: 160,
-            decoration: BoxDecoration(
-              color: _BMI.blueLight,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.broken_image_outlined,
-                    size: 40, color: _BMI.blue.withOpacity(0.3)),
-                const SizedBox(height: 8),
-                const Text(
-                  'Gagal memuat foto',
-                  style: TextStyle(fontSize: 13, color: _BMI.textLight),
-                ),
-                const SizedBox(height: 4),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    imageUrl,
-                    style: TextStyle(
-                        fontSize: 10, color: _BMI.textLight.withOpacity(0.6)),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+        color: _BMI.blueLight,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: _BMI.blue,
+            strokeWidth: 3,
+          ),
+        ),
       ),
     );
   }

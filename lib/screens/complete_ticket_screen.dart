@@ -7,6 +7,8 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../providers/ticket_provider.dart';
 import '../utils/image_compression.dart';
+import '../widgets/photo_zoom_viewer.dart';
+import '../widgets/zoomable_image.dart';
 import 'home_screen.dart';
 
 class CompleteTicketScreen extends StatefulWidget {
@@ -22,12 +24,13 @@ class CompleteTicketScreen extends StatefulWidget {
 }
 
 class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
-  File? _selectedImage;
-  Uint8List? _selectedImageBytes;
-  CompressionResult? _compressionResult;
+  List<File> _selectedImages = [];
+  List<Uint8List> _selectedImageBytes = [];
+  List<CompressionResult?> _compressionResults = [];
   bool _isCompressing = false;
   late TextEditingController _materialController;
   final ImagePicker _imagePicker = ImagePicker();
+  static const int maxPhotos = 3;
 
   @override
   void initState() {
@@ -84,6 +87,18 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
   }
 
   Future<void> _compressAndSetImage(File imageFile) async {
+    if (_selectedImages.length >= maxPhotos) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Maksimum $maxPhotos foto sudah tercapai'),
+            backgroundColor: const Color(0xFFE53935),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _isCompressing = true;
     });
@@ -100,9 +115,9 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
 
       final bytes = await compressionResult.compressedFile.readAsBytes();
       setState(() {
-        _selectedImage = compressionResult.compressedFile;
-        _selectedImageBytes = bytes;
-        _compressionResult = compressionResult;
+        _selectedImages.add(compressionResult.compressedFile);
+        _selectedImageBytes.add(bytes);
+        _compressionResults.add(compressionResult);
         _isCompressing = false;
       });
 
@@ -110,7 +125,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Foto berhasil dikompres (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
+            'Foto ${_selectedImages.length} berhasil ditambahkan (${compressionResult.compressionPercentage.toStringAsFixed(1)}% lebih kecil)',
           ),
           backgroundColor: const Color(0xFF43A047),
           duration: const Duration(seconds: 3),
@@ -173,10 +188,10 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
   }
 
   void _handleUpload() {
-    if (_selectedImage == null) {
+    if (_selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Foto bukti harus dipilih'),
+          content: Text('Minimal 1 foto bukti harus dipilih'),
           backgroundColor: Color(0xFFE53935),
         ),
       );
@@ -185,7 +200,7 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
     
     context.read<TicketProvider>().completeTicket(
       widget.ticketId,
-      _selectedImage!.path,
+      _selectedImages.map((f) => f.path).toList(),
       _materialController.text.isEmpty ? null : _materialController.text,
       fileBytes: _selectedImageBytes,
     ).then((success) {
@@ -281,17 +296,30 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
               const SizedBox(height: 28),
 
               // Photo Section
-              Text(
-                'Foto Bukti Perbaikan',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.grey[900],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Foto Bukti Perbaikan',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[900],
+                    ),
+                  ),
+                  Text(
+                    '${_selectedImages.length}/$maxPhotos',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF43A047),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
-                'Ambil atau pilih foto yang menunjukkan hasil perbaikan',
+                'Ambil atau pilih foto yang menunjukkan hasil perbaikan (hingga $maxPhotos)',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],
@@ -347,12 +375,12 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                     ],
                   ),
                 )
-              else if (_selectedImage == null)
+              else if (_selectedImages.isEmpty)
                 GestureDetector(
                   onTap: _showImagePickerOptions,
                   child: Container(
                     width: double.infinity,
-                    height: 220,
+                    height: 180,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: const Color(0xFF43A047).withOpacity(0.3),
@@ -402,122 +430,133 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
               else
                 Column(
                   children: [
-                    Stack(
+                    // Photo Grid (3 columns)
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        Container(
-                          width: double.infinity,
-                          height: 280,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            color: Colors.grey.withOpacity(0.2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: kIsWeb && _selectedImageBytes != null
-                                ? Image.memory(
-                                    _selectedImageBytes!,
-                                    fit: BoxFit.cover,
-                                  )
-                                : _selectedImage != null
-                                    ? Image.file(
-                                        _selectedImage!,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(),
-                          ),
-                        ),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE53935),
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
+                        for (int i = 0; i < _selectedImages.length; i++)
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PhotoZoomViewer(
+                                    images: _selectedImages,
+                                    initialIndex: i,
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.close),
-                              color: Colors.white,
-                              onPressed: () {
-                                setState(() {
-                                  _selectedImage = null;
-                                  _selectedImageBytes = null;
-                                  _compressionResult = null;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 12,
-                          right: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
+                              );
+                            },
+                            child: Stack(
                               children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Color(0xFF43A047),
-                                  size: 16,
+                                Container(
+                                  width: (MediaQuery.of(context).size.width - 50) / 3,
+                                  height: (MediaQuery.of(context).size.width - 50) / 3,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFF43A047).withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: kIsWeb && i < _selectedImageBytes.length
+                                        ? Image.memory(
+                                            _selectedImageBytes[i],
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.file(
+                                            _selectedImages[i],
+                                            fit: BoxFit.cover,
+                                          ),
+                                  ),
                                 ),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Foto dipilih',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                // Remove button
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.black.withOpacity(0.6),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.close),
+                                      color: Colors.white,
+                                      iconSize: 16,
+                                      onPressed: () {
+                                        setState(() {
+                                          _selectedImages.removeAt(i);
+                                          _selectedImageBytes.removeAt(i);
+                                          _compressionResults.removeAt(i);
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                // Zoom icon
+                                Positioned(
+                                  bottom: 4,
+                                  right: 4,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: const Color(0xFF43A047).withOpacity(0.8),
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.zoom_in,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
+                        // Add photo button
+                        if (_selectedImages.length < maxPhotos)
+                          GestureDetector(
+                            onTap: _showImagePickerOptions,
+                            child: Container(
+                              width: (MediaQuery.of(context).size.width - 50) / 3,
+                              height: (MediaQuery.of(context).size.width - 50) / 3,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFF43A047).withOpacity(0.3),
+                                  width: 2,
+                                  style: BorderStyle.solid,
+                                ),
+                                color: const Color(0xFF43A047).withOpacity(0.05),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 28,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Tambah',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _showImagePickerOptions,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Ganti Foto'),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color(0xFF1565C0),
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          foregroundColor: const Color(0xFF1565C0),
-                        ),
-                      ),
-                    ),
-                    if (_compressionResult != null) ...[
-                      const SizedBox(height: 12),
+                    // Compression Info
+                    if (_compressionResults.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -550,86 +589,53 @@ class _CompleteTicketScreenState extends State<CompleteTicketScreen> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Column(
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Ukuran Asli',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.w500,
+                                for (int i = 0; i < _compressionResults.length; i++)
+                                  if (_compressionResults[i] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Foto ${i + 1}',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey[600],
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '${_compressionResults[i]!.originalSize} → ${_compressionResults[i]!.compressedSize}',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            '${_compressionResults[i]!.compressionPercentage.toStringAsFixed(1)}%',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF43A047),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _compressionResult!.originalSize,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  size: 18,
-                                  color: Colors.grey[400],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Ukuran Terkompresi',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _compressionResult!.compressedSize,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF43A047),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'Reduksi',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${_compressionResult!.compressionPercentage.toStringAsFixed(1)}%',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF43A047),
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                    ],
                   ],
                 ),
               const SizedBox(height: 28),
