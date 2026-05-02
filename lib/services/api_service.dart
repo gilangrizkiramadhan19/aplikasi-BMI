@@ -278,7 +278,8 @@ class ApiService {
   }
 
   /// Fetch Preventive Maintenance schedules by month
-  /// Endpoint: GET /api/preventive-maintenance/?year=YYYY&month=MM
+  /// Endpoint: GET /api/schedules/month/{month_id}/
+  /// Note: Backend automatically filters data for year 2026
   static Future<List<Schedule>> getSchedulesByMonth(int year, int month) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -286,7 +287,8 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
-      final url = '$baseUrl/api/preventive-maintenance/?year=$year&month=$month';
+      // Use new endpoint format: /api/schedules/month/{month_id}/
+      final url = '$baseUrl/api/schedules/month/$month/';
       print('[v0] DEBUG: Fetching schedules from: $url');
 
       final response = await http.get(
@@ -312,7 +314,7 @@ class ApiService {
   }
 
   /// Take/Terima Jadwal Preventive Maintenance task
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
+  /// Endpoint: PATCH /api/schedules/{id}/
   /// Body: {"status": "IN_PROGRESS"}
   static Future<void> takeScheduleTask(int scheduleId) async {
     try {
@@ -321,8 +323,9 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
+      // Use new endpoint format: /api/schedules/{id}/
       final response = await http.patch(
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/'),
         headers: _getHeaders(token: token),
         body: jsonEncode({'status': 'IN_PROGRESS'}),
       ).timeout(const Duration(seconds: 10));
@@ -339,7 +342,7 @@ class ApiService {
   }
 
   /// Submit Preventive Maintenance report dengan dokumentasi (multiple photos)
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
+  /// Endpoint: PATCH /api/schedules/{id}/
   /// Body: Multipart Form Data dengan status=RESOLVED, photos=files[], keterangan=text, material_used=text
   static Future<void> submitScheduleReport(
     int scheduleId,
@@ -356,9 +359,10 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
+      // Use new endpoint format: /api/schedules/{id}/
       final request = http.MultipartRequest(
         'PATCH',
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/'),
       );
 
       request.headers['Authorization'] = 'Token $token';

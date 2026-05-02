@@ -27,9 +27,9 @@ OPEN → User klik "Terima Tugas" → IN_PROGRESS → User klik "Selesaikan" →
 
 ### 3. API Integration
 **File:** `lib/services/api_service.dart` - Tambahan methods:
-- `getSchedulesByMonth(year, month)` - GET `/api/preventive-maintenance/?year=YYYY&month=MM`
-- `takeScheduleTask(scheduleId)` - PATCH `/api/preventive-maintenance/{id}/` dengan `{"status": "IN_PROGRESS"}`
-- `submitScheduleReport(...)` - PATCH `/api/preventive-maintenance/{id}/` dengan Multipart Form Data
+- `getSchedulesByMonth(year, month)` - GET `/api/schedules/month/{month_id}/` (Backend automatically filters for year 2026)
+- `takeScheduleTask(scheduleId)` - PATCH `/api/schedules/{id}/` dengan `{"status": "IN_PROGRESS"}`
+- `submitScheduleReport(...)` - PATCH `/api/schedules/{id}/` dengan Multipart Form Data
 
 **Multipart Fields untuk Submit Report:**
 - `status`: "RESOLVED"
