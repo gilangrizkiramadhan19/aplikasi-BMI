@@ -7,7 +7,7 @@ import '../models/ticket_model.dart';
 import '../models/schedule_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://upstate-unbaked-peso.ngrok-free.dev';
+  static const String baseUrl = 'http://103.169.238.18:9999';
 
   /// Helper method untuk membuat headers yang konsisten untuk semua request
   /// Termasuk ngrok-skip-browser-warning header yang diperlukan ngrok
@@ -16,6 +16,7 @@ class ApiService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'ngrok-skip-browser-warning': 'true',
+      'Accept-Encoding': 'gzip, deflate',
     };
     
     if (token != null) {
@@ -23,6 +24,20 @@ class ApiService {
     }
     
     return headers;
+  }
+
+  /// Test connection to API
+  static Future<void> testConnection() async {
+    try {
+      print('[v0] DEBUG: Testing connection to API...');
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/'),
+        headers: _getHeaders(),
+      ).timeout(const Duration(seconds: 10));
+      print('[v0] DEBUG: API connection test - Status: ${response.statusCode}');
+    } catch (e) {
+      print('[v0] ERROR: API connection test failed: $e');
+    }
   }
 
   static Future<String> login(String username, String password) async {
@@ -37,7 +52,7 @@ class ApiService {
           'username': username,
           'password': password,
         }),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30)); // Increased timeout for NGROK
 
       print('[v0] DEBUG: Login response status: ${response.statusCode}');
 
@@ -80,7 +95,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse(url),
         headers: _getHeaders(token: token),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30)); // Increased timeout to 30 seconds for NGROK
 
       print('[v0] DEBUG: Response status: ${response.statusCode}');
       final bodyPreview = response.body.length > 200 
@@ -267,7 +282,7 @@ class ApiService {
           'description': description,
           'status': 'OPEN',
         }),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30)); // Increased timeout for NGROK
 
       if (response.statusCode != 201) {
         throw Exception('Failed to create ticket: ${response.statusCode}');
@@ -278,7 +293,8 @@ class ApiService {
   }
 
   /// Fetch Preventive Maintenance schedules by month
-  /// Endpoint: GET /api/preventive-maintenance/?year=YYYY&month=MM
+  /// Endpoint: GET /api/schedules/month/{month_id}/
+  /// Note: Backend automatically filters data for year 2026
   static Future<List<Schedule>> getSchedulesByMonth(int year, int month) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -286,23 +302,32 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
-      final url = '$baseUrl/api/preventive-maintenance/?year=$year&month=$month';
+      // Use new endpoint format: /api/schedules/month/{month_id}/
+      final url = '$baseUrl/api/schedules/month/$month/';
+      final headers = _getHeaders(token: token);
+      
       print('[v0] DEBUG: Fetching schedules from: $url');
+      print('[v0] DEBUG: Using token: ${token.substring(0, 10)}...');
+      print('[v0] DEBUG: Request headers: $headers');
 
       final response = await http.get(
         Uri.parse(url),
-        headers: _getHeaders(token: token),
-      ).timeout(const Duration(seconds: 10));
+        headers: headers,
+      ).timeout(const Duration(seconds: 30)); // Increased timeout to 30 seconds for NGROK
 
       print('[v0] DEBUG: Schedule response status: ${response.statusCode}');
-
+      
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         print('[v0] DEBUG: Successfully loaded ${data.length} schedules');
         return data.map((json) => Schedule.fromJson(json as Map<String, dynamic>)).toList();
       } else if (response.statusCode == 401) {
+        print('[v0] ERROR: Authentication failed - Token invalid or expired');
+        print('[v0] DEBUG: Response: ${response.body}');
         throw Exception('Unauthorized - Token invalid');
       } else {
+        print('[v0] ERROR: Server returned status ${response.statusCode}');
+        print('[v0] DEBUG: Response: ${response.body}');
         throw Exception('Failed to load schedules: ${response.statusCode}');
       }
     } catch (e) {
@@ -312,7 +337,7 @@ class ApiService {
   }
 
   /// Take/Terima Jadwal Preventive Maintenance task
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
+  /// Endpoint: PATCH /api/schedules/{id}/
   /// Body: {"status": "IN_PROGRESS"}
   static Future<void> takeScheduleTask(int scheduleId) async {
     try {
@@ -321,17 +346,27 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
+      final url = '$baseUrl/api/schedules/$scheduleId/';
+      final headers = _getHeaders(token: token);
+      
+      print('[v0] DEBUG: Taking schedule task - ID: $scheduleId');
+      print('[v0] DEBUG: PATCH to: $url');
+
+      // Use new endpoint format: /api/schedules/{id}/
       final response = await http.patch(
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
-        headers: _getHeaders(token: token),
+        Uri.parse(url),
+        headers: headers,
         body: jsonEncode({'status': 'IN_PROGRESS'}),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 30)); // Increased timeout to 30 seconds for NGROK
 
       print('[v0] DEBUG: Take task response status: ${response.statusCode}');
 
       if (response.statusCode != 200) {
+        print('[v0] ERROR: Failed to take task - Status: ${response.statusCode}');
+        print('[v0] DEBUG: Response: ${response.body}');
         throw Exception('Failed to take task: ${response.statusCode}');
       }
+      print('[v0] DEBUG: Task taken successfully');
     } catch (e) {
       print('[v0] ERROR in takeScheduleTask: $e');
       throw Exception('Take task error: $e');
@@ -339,7 +374,7 @@ class ApiService {
   }
 
   /// Submit Preventive Maintenance report dengan dokumentasi (multiple photos)
-  /// Endpoint: PATCH /api/preventive-maintenance/{id}/
+  /// Endpoint: PATCH /api/schedules/{id}/
   /// Body: Multipart Form Data dengan status=RESOLVED, photos=files[], keterangan=text, material_used=text
   static Future<void> submitScheduleReport(
     int scheduleId,
@@ -356,9 +391,10 @@ class ApiService {
 
       if (token == null) throw Exception('No token found');
 
+      // Use new endpoint format: /api/schedules/{id}/
       final request = http.MultipartRequest(
         'PATCH',
-        Uri.parse('$baseUrl/api/preventive-maintenance/$scheduleId/'),
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/'),
       );
 
       request.headers['Authorization'] = 'Token $token';
@@ -390,14 +426,18 @@ class ApiService {
         }
       }
 
+      print('[v0] DEBUG: Sending multipart request to ${request.url}');
       final response = await request.send().timeout(const Duration(seconds: 30));
 
       print('[v0] DEBUG: Submit report response status: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         final responseBody = await response.stream.bytesToString();
+        print('[v0] ERROR: Failed to submit report - Status: ${response.statusCode}');
+        print('[v0] DEBUG: Response: $responseBody');
         throw Exception('Failed to submit report: ${response.statusCode}');
       }
+      print('[v0] DEBUG: Report submitted successfully');
     } catch (e) {
       print('[v0] ERROR in submitScheduleReport: $e');
       throw Exception('Submit report error: $e');
